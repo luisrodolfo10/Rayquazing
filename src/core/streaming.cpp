@@ -558,6 +558,8 @@ Streaming::Stream &Streaming::Stream::operator<<(flush) {
 void Streaming::Stream::performFlush() {
 #ifdef USE_WIN32
 #define SEND_FLAGS 0
+#elif __APPLE__
+#define SEND_FLAGS 0
 #else
 #define SEND_FLAGS MSG_NOSIGNAL
 #endif
