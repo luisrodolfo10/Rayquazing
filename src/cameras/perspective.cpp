@@ -1,5 +1,5 @@
+#include <cmath>
 #include <lightwave.hpp>
-
 namespace lightwave {
 
 /**
@@ -15,31 +15,54 @@ namespace lightwave {
 class Perspective : public Camera {
 public:
     Perspective(const Properties &properties) : Camera(properties) {
-        NOT_IMPLEMENTED
+        // NOT_IMPLEMENTED
 
         // hints:
         // * precompute any expensive operations here (most importantly
         // trigonometric functions)
         // * use m_resolution to find the aspect ratio of the image
+        float fov      = properties.get<float>("fov");
+        m_aspect_ratio = m_resolution.x() / (float) m_resolution.y();
+        m_tan_half_fov = std::tan(fov * 0.5f * M_PI / 180.0f);
     }
 
     CameraSample sample(const Point2 &normalized, Sampler &rng) const override {
-        NOT_IMPLEMENTED
+        // NOT_IMPLEMENTED
 
         // hints:
         // * use m_transform to transform the local camera coordinate system
         // into the world coordinate system
+
+        // m_transform->apply(ray);
+        float px = normalized.x() * m_aspect_ratio * m_tan_half_fov;
+        float py = normalized.y() * m_tan_half_fov;
+
+        Ray ray;
+        ray.origin    = Vector(0.0f, 0.0f, 0.0f);
+        ray.direction = Vector(px, py, 1.0f).normalized();
+
+        // Transform the ray to world space
+        m_transform->apply(ray);
+
+        // Return the sample
+        return CameraSample{ ray };
     }
 
     std::string toString() const override {
-        return tfm::format("Perspective[\n"
-                           "  width = %d,\n"
-                           "  height = %d,\n"
-                           "  transform = %s,\n"
-                           "]",
-                           m_resolution.x(), m_resolution.y(),
-                           indent(m_transform));
+        return tfm::format(
+            "Perspective[\n"
+            "  width = %d,\n"
+            "  height = %d,\n"
+            "  transform = %s,\n"
+            "]",
+            m_resolution.x(),
+            m_resolution.y(),
+            indent(m_transform));
     }
+
+private:
+    float m_aspect_ratio;
+    float m_tan_half_fov;
 };
 
 } // namespace lightwave
