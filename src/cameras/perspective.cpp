@@ -1,4 +1,4 @@
-#include <cmath>
+
 #include <lightwave.hpp>
 namespace lightwave {
 
@@ -21,9 +21,22 @@ public:
         // * precompute any expensive operations here (most importantly
         // trigonometric functions)
         // * use m_resolution to find the aspect ratio of the image
-        float fov      = properties.get<float>("fov");
-        m_aspect_ratio = m_resolution.x() / (float) m_resolution.y();
-        m_tan_half_fov = std::tan(fov * 0.5f * M_PI / 180.0f);
+        float fov           = properties.get<float>("fov");
+        std::string fovAxis = properties.get<std::string>("fovAxis");
+
+        m_tan_half_fov = tan(fov * 0.5f * M_PI / 180.0f);
+
+        if (fovAxis == "x") {
+            m_aspect_ratio = m_resolution.y() / (float) m_resolution.x();
+            mult_x         = m_tan_half_fov;
+            mult_y         = m_aspect_ratio * m_tan_half_fov;
+        }
+
+        if (fovAxis == "y") {
+            m_aspect_ratio = m_resolution.x() / (float) m_resolution.y();
+            mult_x         = m_aspect_ratio * m_tan_half_fov;
+            mult_y         = m_tan_half_fov;
+        }
     }
 
     CameraSample sample(const Point2 &normalized, Sampler &rng) const override {
@@ -33,19 +46,18 @@ public:
         // * use m_transform to transform the local camera coordinate system
         // into the world coordinate system
 
-        // m_transform->apply(ray);
-        float px = normalized.x() * m_aspect_ratio * m_tan_half_fov;
-        float py = normalized.y() * m_tan_half_fov;
+        float px = normalized.x() * mult_x;
+        float py = normalized.y() * mult_y;
 
         Ray ray;
-        ray.origin    = Vector(0.0f, 0.0f, 0.0f);
-        ray.direction = Vector(px, py, 1.0f).normalized();
+        ray.origin    = Point(0.0f, 0.0f, 0.0f);
+        ray.direction = Vector(px, py, 1.0f);
 
         // Transform the ray to world space
-        m_transform->apply(ray);
+        ray = m_transform->apply(ray).normalized();
 
         // Return the sample
-        return CameraSample{ ray };
+        return CameraSample{ .ray = ray, .weight = Color(1.0f) };
     }
 
     std::string toString() const override {
@@ -63,6 +75,8 @@ public:
 private:
     float m_aspect_ratio;
     float m_tan_half_fov;
+    float mult_x;
+    float mult_y;
 };
 
 } // namespace lightwave
