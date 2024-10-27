@@ -74,11 +74,13 @@ public:
     /// @brief An optional textual representation of this class, which can be
     /// useful for debugging.
     std::string toString() const override {
-        return tfm::format("CameraIntegrator[\n"
-                           "  sampler = %s,\n"
-                           "  image = %s,\n"
-                           "]",
-                           indent(m_sampler), indent(m_image));
+        return tfm::format(
+            "CameraIntegrator[\n"
+            "  sampler = %s,\n"
+            "  image = %s,\n"
+            "]",
+            indent(m_sampler),
+            indent(m_image));
     }
 };
 
