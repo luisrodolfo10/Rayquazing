@@ -24,7 +24,7 @@ public:
         float fov           = properties.get<float>("fov");
         std::string fovAxis = properties.get<std::string>("fovAxis");
 
-        m_tan_half_fov = tan(fov * 0.5f * M_PI / 180.0f);
+        m_tan_half_fov = tan(fov * 0.5f * Pi / 180.0f);
 
         if (fovAxis == "x") {
             m_aspect_ratio = m_resolution.y() / (float) m_resolution.x();
