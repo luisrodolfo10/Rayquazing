@@ -33,12 +33,13 @@ class TriangleMesh : public AccelerationStructure {
     /// geometric normal instead.
     bool m_smoothNormals;
 
-    // inline void populate(SurfaceEvent &surf, const Point &position) const {
-    //     surf.position = position;
+    inline void populate(SurfaceEvent &surf, const Point &position,
+                         Vector normal) const {
+        surf.position = position;
 
-    //     surf.geometryNormal = Vector(position); // vector from sphere
-    //     surf.shadingNormal  = surf.geometryNormal;
-    // }
+        surf.geometryNormal = normal;
+        surf.shadingNormal  = surf.geometryNormal;
+    }
 
 protected:
     int numberOfPrimitives() const override { return int(m_triangles.size()); }
@@ -54,10 +55,12 @@ protected:
         Vertex v2                = m_vertices[triangleIndices[1]];
         Vertex v3                = m_vertices[triangleIndices[2]];
 
+        // Edges of triangle
         Vector e1           = v2.position - v1.position;
         Vector e2           = v3.position - v1.position;
         Vector ray_cross_e2 = ray.direction.cross(e2);
-        float det           = e1.dot(ray_cross_e2);
+        Vector normal;
+        float det = e1.dot(ray_cross_e2);
 
         if (det > -Epsilon && det < Epsilon)
             return false;
@@ -86,18 +89,21 @@ protected:
                     interpolateBarycentric(
                         bary, v1.normal, v2.normal, v3.normal)
                         .normalized();
-                its.geometryNormal = interpolatedNormal;
-                its.shadingNormal  = its.geometryNormal;
+                normal = interpolatedNormal;
             } else {
-                its.geometryNormal = e1.cross(e2).normalized();
-                its.shadingNormal  = its.geometryNormal;
+                normal = e1.cross(e2).normalized();
             }
 
             Point intersectionPosition = ray.origin + t * ray.direction;
+            // fill intersection details
+            populate(its, intersectionPosition, normal);
             return true;
         } else {
             return false;
         }
+        // Code reference from the wikipedia page of the
+        // Moller-Trumbore Algorithm
+        //  https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
     }
 
     Bounds getBoundingBox(int primitiveIndex) const override {
