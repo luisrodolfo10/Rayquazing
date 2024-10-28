@@ -33,29 +33,103 @@ class TriangleMesh : public AccelerationStructure {
     /// geometric normal instead.
     bool m_smoothNormals;
 
+    inline void populate(SurfaceEvent &surf, const Point &position,
+                         Vector normal) const {
+        surf.position = position;
+
+        surf.geometryNormal = normal;
+        surf.shadingNormal  = surf.geometryNormal;
+    }
+
 protected:
     int numberOfPrimitives() const override { return int(m_triangles.size()); }
 
     bool intersect(int primitiveIndex, const Ray &ray, Intersection &its,
                    Sampler &rng) const override {
-        NOT_IMPLEMENTED
 
         // hints:
         // * use m_triangles[primitiveIndex] to get the vertex indices of the
         // triangle that should be intersected
-        // * if m_smoothNormals is true, interpolate the vertex normals from
-        // m_vertices
-        //   * make sure that your shading frame stays orthonormal!
-        // * if m_smoothNormals is false, use the geometrical normal (can be
-        // computed from the vertex positions)
+        Vector3i triangleIndices = m_triangles[primitiveIndex];
+        Vertex v1                = m_vertices[triangleIndices[0]];
+        Vertex v2                = m_vertices[triangleIndices[1]];
+        Vertex v3                = m_vertices[triangleIndices[2]];
+
+        // Edges of triangle
+        Vector e1           = v2.position - v1.position;
+        Vector e2           = v3.position - v1.position;
+        Vector ray_cross_e2 = ray.direction.cross(e2);
+        Vector normal;
+        float det = e1.dot(ray_cross_e2);
+
+        if (det > -Epsilon && det < Epsilon)
+            return false;
+
+        float inv_det = 1.0 / det;
+        Vector s      = ray.origin - v1.position;
+        float u       = inv_det * s.dot(ray_cross_e2);
+
+        if (u < 0 || u > 1)
+            return false;
+
+        Vector s_cross_e1 = s.cross(e1);
+        float v           = inv_det * ray.direction.dot(s_cross_e1);
+
+        if (v < 0 || u + v > 1)
+            return false;
+
+        float t = inv_det * e2.dot(s_cross_e1);
+
+        if (t > Epsilon) {
+            its.t = t;
+
+            if (m_smoothNormals) {
+                Vector2 bary(u, v);
+                Vector interpolatedNormal =
+                    interpolateBarycentric(
+                        bary, v1.normal, v2.normal, v3.normal)
+                        .normalized();
+                normal = interpolatedNormal;
+            } else {
+                normal = e1.cross(e2).normalized();
+            }
+
+            Point intersectionPosition = ray.origin + t * ray.direction;
+            // fill intersection details
+            populate(its, intersectionPosition, normal);
+            return true;
+        } else {
+            return false;
+        }
+        // Code reference from the wikipedia page of the
+        // Moller-Trumbore Algorithm
+        //  https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
     }
 
     Bounds getBoundingBox(int primitiveIndex) const override {
-        NOT_IMPLEMENTED
+        Vector3i indices = m_triangles[primitiveIndex];
+        Vertex v1        = m_vertices[indices[0]];
+        Vertex v2        = m_vertices[indices[1]];
+        Vertex v3        = m_vertices[indices[2]];
+
+        Bounds box;
+        box.extend(v1.position);
+        box.extend(v2.position);
+        box.extend(v3.position);
+        return box;
     }
 
     Point getCentroid(int primitiveIndex) const override {
-        NOT_IMPLEMENTED
+        Vector3i indices = m_triangles[primitiveIndex];
+        Point v1         = m_vertices[indices[0]].position;
+        Point v2         = m_vertices[indices[1]].position;
+        Point v3         = m_vertices[indices[2]].position;
+
+        float x = (v1[0] + v2[0] + v3[0]) / 3.0f;
+        float y = (v1[1] + v2[1] + v3[1]) / 3.0f;
+        float z = (v1[2] + v2[2] + v3[2]) / 3.0f;
+
+        return Point(x, y, z);
     }
 
 public:
@@ -77,7 +151,8 @@ public:
     }
 
     AreaSample sampleArea(Sampler &rng) const override{
-        // only implement this if you need triangle mesh area light sampling for
+        // only implement this if you need triangle mesh
+        // area light sampling for
         // your rendering competition
         NOT_IMPLEMENTED
     }
