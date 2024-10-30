@@ -88,18 +88,6 @@ bool Instance::intersect(const Ray &worldRay, Intersection &its,
         its.instance = this;
         validateIntersection(its);
         //  hint: how does its.t need to change?
-
-        // if (its.frame.normal.dot(localRay.direction) > 0) {
-        //     /// TODO: hack, just for testing
-        //     its.frame.tangent *= -1;
-        //     its.frame.bitangent *= -1;
-        //     its.frame.normal *= -1;
-
-        //     its.geoFrame.tangent *= -1;
-        //     its.geoFrame.bitangent *= -1;
-        //     its.geoFrame.normal *= -1;
-        // }
-
         its.t = its.t / scale_t;
 
         // Checking if normal is flipped
@@ -110,24 +98,12 @@ bool Instance::intersect(const Ray &worldRay, Intersection &its,
         }
 
         transformFrame(its, -localRay.direction);
-
         // Checking if normal is flipped
         if (its.geometryNormal.dot(worldRay.direction) > 0) {
             its.geometryNormal *= -1;
             its.shadingNormal *= -1;
             its.tangent *= -1;
         }
-
-        // if (its.frame.normal.dot(worldRay.direction) > 0) {
-        //     /// TODO: hack, just for testing
-        //     its.frame.tangent *= -1;
-        //     its.frame.bitangent *= -1;
-        //     its.frame.normal *= -1;
-
-        //     its.geoFrame.tangent *= -1;
-        //     its.geoFrame.bitangent *= -1;
-        //     its.geoFrame.normal *= -1;
-        // }
     } else {
         its.t = previousT;
     }
