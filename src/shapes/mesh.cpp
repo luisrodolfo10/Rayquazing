@@ -34,11 +34,13 @@ class TriangleMesh : public AccelerationStructure {
     bool m_smoothNormals;
 
     inline void populate(SurfaceEvent &surf, const Point &position,
-                         Vector normal) const {
+                         Vector normal, Vector shadingNormal,
+                         Vector tangent) const {
         surf.position = position;
 
         surf.geometryNormal = normal;
-        surf.shadingNormal  = surf.geometryNormal;
+        surf.shadingNormal  = shadingNormal;
+        surf.tangent        = tangent;
     }
 
 protected:
@@ -60,12 +62,13 @@ protected:
         Vector e2           = v3.position - v1.position;
         Vector ray_cross_e2 = ray.direction.cross(e2);
         Vector normal;
+        Vector shadingNormal;
         float det = e1.dot(ray_cross_e2);
 
-        if (det > -Epsilon && det < Epsilon)
+        if (det > Epsilon && det < Epsilon)
             return false;
 
-        float inv_det = 1.0 / det;
+        float inv_det = 1.0f / det;
         Vector s      = ray.origin - v1.position;
         float u       = inv_det * s.dot(ray_cross_e2);
 
@@ -80,23 +83,39 @@ protected:
 
         float t = inv_det * e2.dot(s_cross_e1);
 
-        if (t > Epsilon) {
+        if (t > Epsilon && t < its.t) {
             its.t = t;
 
+            normal = e1.cross(e2).normalized();
             if (m_smoothNormals) {
                 Vector2 bary(u, v);
                 Vector interpolatedNormal =
                     interpolateBarycentric(
                         bary, v1.normal, v2.normal, v3.normal)
                         .normalized();
-                normal = interpolatedNormal;
+                shadingNormal = interpolatedNormal;
             } else {
-                normal = e1.cross(e2).normalized();
+                shadingNormal = normal;
             }
 
             Point intersectionPosition = ray.origin + t * ray.direction;
+            // UV coordinates for the vertices
+            Vector2 uv0 = v1.uv;
+            Vector2 uv1 = v2.uv;
+            Vector2 uv2 = v3.uv;
+
+            // Calculate differences in UV coordinates
+            Vector2 deltaUV1 = uv1 - uv0;
+            Vector2 deltaUV2 = uv2 - uv0;
+
+            // Calculate the determinant
+            float f =
+                1.0f / (deltaUV1[0] * deltaUV2[1] - deltaUV2[0] * deltaUV1[1]);
+            // Calculate the tangent and bitangent vectors
             // fill intersection details
-            populate(its, intersectionPosition, normal);
+            Vector tangent =
+                (e1 * deltaUV2[1] - e2 * deltaUV1[1]) * f; // Tangent
+            populate(its, intersectionPosition, normal, shadingNormal, tangent);
             return true;
         } else {
             return false;
