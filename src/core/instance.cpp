@@ -6,6 +6,26 @@
 namespace lightwave {
 
 void Instance::transformFrame(SurfaceEvent &surf, const Vector &wo) const {
+    Frame shadingFrame = surf.shadingFrame();
+
+    shadingFrame.tangent =
+        m_transform->apply(shadingFrame.tangent).normalized();
+    shadingFrame.normal =
+        m_transform->applyNormal(shadingFrame.normal).normalized();
+    shadingFrame.bitangent =
+        shadingFrame.normal.cross(shadingFrame.tangent).normalized();
+
+    // if (shadingFrame.normal.dot(wo) > 0) {
+    //     shadingFrame.normal *= -1;
+    //     shadingFrame.tangent *= -1;
+    //     shadingFrame.bitangent =
+    //         shadingFrame.normal.cross(shadingFrame.tangent).normalized();
+    // }
+
+    surf.tangent = shadingFrame.tangent;
+    surf.geometryNormal =
+        shadingFrame.bitangent.cross(shadingFrame.tangent).normalized();
+    surf.shadingNormal = surf.geometryNormal;
 }
 
 inline void validateIntersection(const Intersection &its) {
@@ -50,7 +70,14 @@ bool Instance::intersect(const Ray &worldRay, Intersection &its,
 
     const float previousT = its.t;
     Ray localRay;
-    NOT_IMPLEMENTED
+
+    // Transform the ray
+    localRay.origin    = m_transform->inverse(worldRay.origin);
+    localRay.direction = m_transform->inverse(worldRay.direction);
+    const float scale_t =
+        (localRay.direction.length() / worldRay.direction.length());
+    its.t              = its.t * scale_t;
+    localRay.direction = localRay.direction.normalized();
 
     // hints:
     // * transform the ray (do not forget to normalize!)
@@ -60,7 +87,7 @@ bool Instance::intersect(const Ray &worldRay, Intersection &its,
     if (wasIntersected) {
         its.instance = this;
         validateIntersection(its);
-        // hint: how does its.t need to change?
+        //  hint: how does its.t need to change?
 
         // if (its.frame.normal.dot(localRay.direction) > 0) {
         //     /// TODO: hack, just for testing
@@ -72,7 +99,25 @@ bool Instance::intersect(const Ray &worldRay, Intersection &its,
         //     its.geoFrame.bitangent *= -1;
         //     its.geoFrame.normal *= -1;
         // }
+
+        its.t = its.t / scale_t;
+
+        // Checking if normal is flipped
+        if (its.geometryNormal.dot(localRay.direction) > 0) {
+            its.geometryNormal *= -1;
+            its.shadingNormal *= -1;
+            its.tangent *= -1;
+        }
+
         transformFrame(its, -localRay.direction);
+
+        // Checking if normal is flipped
+        if (its.geometryNormal.dot(worldRay.direction) > 0) {
+            its.geometryNormal *= -1;
+            its.shadingNormal *= -1;
+            its.tangent *= -1;
+        }
+
         // if (its.frame.normal.dot(worldRay.direction) > 0) {
         //     /// TODO: hack, just for testing
         //     its.frame.tangent *= -1;

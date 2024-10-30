@@ -11,6 +11,12 @@ class Sphere : public Shape {
 
         surf.geometryNormal = Vector(position); // vector from sphere
         surf.shadingNormal  = surf.geometryNormal;
+        // Any vector to calculate the tangent
+        Vector up = { 0, 1, 0 };
+        if (abs(surf.geometryNormal[1]) > 0.99f) {
+            up = { 1, 0, 0 }; // Use a horizontal vector if the normal is close
+        }
+        surf.tangent = surf.geometryNormal.cross(up).normalized();
     }
 
 public:
@@ -33,7 +39,9 @@ public:
             float t1               = (-b - sqrtDiscriminant) / (2.0f * a);
             float t2               = (-b + sqrtDiscriminant) / (2.0f * a);
             float t                = (t1 < t2 && t1 > Epsilon) ? t1 : t2;
+            // Using smaller t
 
+            // Checking previous t -> using the closest
             if (t > Epsilon && t < its.t) {
                 its.t                = t;
                 const Point position = ray(t);
