@@ -68,7 +68,7 @@ for filename in args.filenames:
         tests += [filename]
         continue
     
-    path = os.path.join(root_path, "tests", filename)
+    path = os.path.join(root_path, "tests", "practical_1")   ## Put Folder of tests
     if os.path.isfile(path):
         tests += [path]
     elif os.path.isdir(path):

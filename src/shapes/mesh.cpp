@@ -99,19 +99,16 @@ protected:
             }
 
             Point intersectionPosition = ray.origin + t * ray.direction;
-            // UV coordinates for the vertices
+
             Vector2 uv0 = v1.uv;
             Vector2 uv1 = v2.uv;
             Vector2 uv2 = v3.uv;
 
-            // Calculate differences in UV coordinates
             Vector2 deltaUV1 = uv1 - uv0;
             Vector2 deltaUV2 = uv2 - uv0;
 
-            // Calculate the determinant
             float f =
                 1.0f / (deltaUV1[0] * deltaUV2[1] - deltaUV2[0] * deltaUV1[1]);
-            // Calculate the tangent and bitangent vectors
             // fill intersection details
             Vector tangent =
                 (e1 * deltaUV2[1] - e2 * deltaUV1[1]) * f; // Tangent
