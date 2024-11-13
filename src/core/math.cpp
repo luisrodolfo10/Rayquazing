@@ -190,6 +190,15 @@ BsdfSample Intersection::sampleBsdf(Sampler &rng) const {
     return bsdfSample;
 }
 
+BsdfEval Intersection::evaluateBsdf(const Vector &wi) const {
+    PROFILE("Evaluate Bsdf")
+
+    if (!instance || !instance->bsdf())
+        return BsdfEval::invalid();
+    return instance->bsdf()->evaluate(
+        uv, shadingFrame().toLocal(wo), shadingFrame().toLocal(wi));
+}
+
 Light *Intersection::light() const {
     if (!instance)
         return background;

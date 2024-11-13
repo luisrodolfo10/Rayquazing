@@ -35,9 +35,40 @@ struct BsdfSample {
     explicit operator bool() const { return !isInvalid(); }
 };
 
+/// @brief The result of evaluating a material using @ref Bsdf::evaluate .
+struct BsdfEval {
+    /// @brief The value of the Bsdf, given by @code cos(theta) * B(wi, wo)
+    /// @endcode
+    Color value;
+
+    /// @brief Indicates that the Bsdf is zero for the given pair of directions.
+    static BsdfEval invalid() {
+        return {
+            .value = Color(0),
+        };
+    }
+
+    bool isInvalid() const { return value == Color(0); }
+    explicit operator bool() const { return !isInvalid(); }
+};
+
 /// @brief A Bsdf, representing the scattering distribution of a surface.
 class Bsdf : public Object {
 public:
+    /**
+     * @brief Evaluates the Bsdf (including the cosine term) for a given pair
+     * of directions in local coordinates (i.e., the normal is assumed to be
+     * [0,0,1]).
+     * @param uv The texture coordinates of the surface.
+     * @param wo The outgoing direction light is scattered in, pointing away
+     * from the surface, in local coordinates.
+     * @param wi The incoming direction light comes from, pointing away
+     * from the surface, in local coordinates.
+     */
+    virtual BsdfEval evaluate(const Point2 &uv, const Vector &wo,
+                              const Vector &wi) const {
+        NOT_IMPLEMENTED
+    }
     /**
      * @brief Samples a direction according to the distribution of the Bsdf in
      * local coordinates (i.e., the normal is assumed to be [0,0,1]).
