@@ -103,7 +103,7 @@ public:
         return false;
     }
 
-    float getDistance(const Point &p) const override {
+    float getDistance(const Point &p) const {
         float minDistance = std::numeric_limits<float>::max();
 
         for (const Vector &point : pointCloud) {
