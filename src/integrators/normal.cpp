@@ -13,7 +13,7 @@ public:
     Color Li(const Ray &ray, Sampler &rng) override {
         Intersection its = m_scene->intersect(ray, rng);
         if (its) {
-            Vector normal = its.geometryNormal;
+            Vector normal = its.shadingNormal;
             if (m_remap) {
                 normal = (normal + Vector(1)) / 2;
             }
