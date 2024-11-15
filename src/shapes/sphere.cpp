@@ -9,8 +9,9 @@ class Sphere : public Shape {
     inline void populate(SurfaceEvent &surf, const Point &position) const {
         surf.position = position;
 
-        surf.geometryNormal = Vector(position); // vector from sphere
-        surf.shadingNormal  = surf.geometryNormal;
+        surf.geometryNormal =
+            Vector(position).normalized(); // vector from sphere
+        surf.shadingNormal = surf.geometryNormal;
         // Any vector to calculate the tangent
         Vector up = { 0, 1, 0 };
         if (abs(surf.geometryNormal[1]) > 0.99f) {
@@ -27,7 +28,7 @@ public:
     bool intersect(const Ray &ray, Intersection &its,
                    Sampler &rng) const override {
         Vector oc          = Vector(ray.origin);
-        float a            = ray.direction.dot(ray.direction);
+        float a            = 1;
         float b            = 2.0f * oc.dot(ray.direction);
         float c            = oc.dot(oc) - radius * radius;
         float discriminant = b * b - 4 * a * c;

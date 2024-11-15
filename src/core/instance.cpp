@@ -72,8 +72,7 @@ bool Instance::intersect(const Ray &worldRay, Intersection &its,
     Ray localRay;
 
     // Transform the ray
-    localRay.origin    = m_transform->inverse(worldRay.origin);
-    localRay.direction = m_transform->inverse(worldRay.direction);
+    localRay = m_transform->inverse(worldRay);
     const float scale_t =
         (localRay.direction.length() / worldRay.direction.length());
     its.t              = its.t * scale_t;
