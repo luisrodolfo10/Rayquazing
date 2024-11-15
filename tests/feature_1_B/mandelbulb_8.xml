@@ -14,7 +14,7 @@
             </camera>
 
             <instance>
-                <shape type="SquaredPointCloud"/>
+                <shape type="PointCloud"/>
             </instance>
 
             <!-- <instance>
