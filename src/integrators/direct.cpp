@@ -8,6 +8,7 @@ class DirectIntegrator : public SamplingIntegrator {
 public:
     DirectIntegrator(const Properties &properties)
         : SamplingIntegrator(properties) {
+        // Do we need it?
         m_remap = properties.get<bool>("remap", true);
     }
     Color Li(const Ray &ray, Sampler &rng) override {
@@ -21,13 +22,17 @@ public:
             LightSample lightSample = m_scene->sampleLight(rng);
             DirectLightSample directSample =
                 lightSample.light->sampleDirect(its.position, rng);
-            Ray SecondaryRay           = Ray(its.position, directSample.wi);
-            Intersection secondary_its = m_scene->intersect(SecondaryRay, rng);
 
-            if (!secondary_its) {
+            Ray secondaryRay = Ray(its.position + its.shadingNormal * Epsilon,
+                                   directSample.wi);
+            Intersection secondaryIts = m_scene->intersect(secondaryRay, rng);
+            if (!secondaryIts || secondaryIts.t > directSample.distance) {
                 float cosTheta =
                     std::max(0.f, its.shadingNormal.dot(directSample.wi));
-                Color contribution = directSample.weight * cosTheta;
+                BsdfEval bsdf = its.evaluateBsdf(directSample.wi);
+
+                Color contribution =
+                    directSample.weight * bsdf.value * cosTheta;
                 return contribution;
             }
             return Color(0.f);
