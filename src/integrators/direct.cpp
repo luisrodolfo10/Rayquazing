@@ -39,11 +39,10 @@ public:
                 if (!bsdf.isInvalid()) {
                     Color contribution =
                         directSample.weight * bsdf.value * cosTheta;
-                    return emission + contribution;
+                    return contribution;
                 }
             }
-            // return Color(0.f);
-            return emission;
+            return Color(0.f);
         } else {
             // If no surface interaction was found, add the contribution of the
             // background environment map (if any). For this you can use the
@@ -51,7 +50,7 @@ public:
             // optional background light, which provides color when rays exit
             // the scene. ref<BackgroundLight> m_background; BackgroundLight is
             // a light initialised with a direction
-            return Color(0.f);
+            return its.evaluateEmission().value;
         }
     }
     std::string toString() const override {
