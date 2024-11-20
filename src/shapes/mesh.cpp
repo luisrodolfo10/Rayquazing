@@ -77,7 +77,6 @@ protected:
 
         Vector s_cross_e1 = s.cross(e1);
         float v           = inv_det * ray.direction.dot(s_cross_e1);
-        Point2 uv         = Point2(u, v);
         if (v < 0 || u + v > 1)
             return false;
 
@@ -87,8 +86,10 @@ protected:
             its.t = t;
 
             normal = e1.cross(e2).normalized();
+            Vector2 bary(u, v);
+            Point2 uv = interpolateBarycentric(bary, v1.uv, v2.uv, v3.uv);
+
             if (m_smoothNormals) {
-                Vector2 bary(u, v);
                 Vector interpolatedNormal =
                     interpolateBarycentric(
                         bary, v1.normal, v2.normal, v3.normal)
@@ -112,6 +113,7 @@ protected:
             // fill intersection details
             Vector tangent =
                 (e1 * deltaUV2[1] - e2 * deltaUV1[1]) * f; // Tangent
+
             populate(
                 its, intersectionPosition, normal, shadingNormal, tangent, uv);
             return true;

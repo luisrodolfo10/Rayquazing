@@ -50,7 +50,7 @@ public:
 
     Color evaluate(const Point2 &uv) const override {
         float u = uv[0];
-        float v = uv[1];
+        float v = -uv[1] + 1;
         if (m_border == BorderMode::Clamp) {
             u = clamp(u);
             v = clamp(v);

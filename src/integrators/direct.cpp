@@ -27,8 +27,9 @@ public:
                 lightSample.light->sampleDirect(its.position, rng);
 
             // Trace a secondary ray in the direction of the light.
-            Ray secondaryRay = Ray(its.position + its.shadingNormal * Epsilon,
-                                   directSample.wi);
+            Ray secondaryRay;
+            secondaryRay.origin       = its.position;
+            secondaryRay.direction    = directSample.wi;
             Intersection secondaryIts = m_scene->intersect(secondaryRay, rng);
             // And if the light is not occluded add its contribution weighted by
             // the bsdf value at the first intersection.
