@@ -29,9 +29,7 @@ struct BsdfSample {
     }
 
     /// @brief Tests whether the sample is invalid (i.e., sampling has failed).
-    bool isInvalid() const {
-        return weight == Color(0);
-    }
+    bool isInvalid() const { return weight == Color(0); }
     explicit operator bool() const { return !isInvalid(); }
 };
 

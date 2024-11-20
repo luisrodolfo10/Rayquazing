@@ -8,6 +8,11 @@ class Sphere : public Shape {
 
     inline void populate(SurfaceEvent &surf, const Point &position) const {
         surf.position = position;
+        float phi     = atan2(position[0], position[2]);
+        float theta   = acos(position[1] / radius);
+        float u       = (phi + Pi) / (2 * Pi);
+        float v       = theta / Pi;
+        surf.uv       = Point2(u, v);
 
         surf.geometryNormal =
             Vector(position).normalized(); // vector from sphere

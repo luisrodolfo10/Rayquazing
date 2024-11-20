@@ -95,7 +95,7 @@ bool Instance::intersect(const Ray &worldRay, Intersection &its,
             its.shadingNormal *= -1;
             its.tangent *= -1;
         }
-
+        its.position = m_transform->apply(its.position);
         transformFrame(its, -localRay.direction);
         // Checking if normal is flipped
         if (its.geometryNormal.dot(worldRay.direction) > 0) {
