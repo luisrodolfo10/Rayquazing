@@ -191,7 +191,22 @@ class AccelerationStructure : public Shape {
      */
     void binning(const Node &node, int &bestSplitAxis,
                  float &bestSplitPosition) {
-        NOT_IMPLEMENTED
+        float bestCost  = Infinity;
+        Point boundsMin = node.aabb.min();
+        Point boundsMax = node.aabb.max();
+        for (int a = 0; a < 3; a++) {
+            if (boundsMin[a] == boundsMax[a])
+                continue;
+            float scale = (boundsMax[a] - boundsMin[a]) / 100;
+            for (uint i = 1; i < 100; i++) {
+                float candidatePos = boundsMin[a] + i * scale;
+                float cost         = 0;
+                // float cost         = EvaluateSAH(node, a, candidatePos);
+                if (cost < bestCost)
+                    bestSplitPosition = candidatePos, bestSplitAxis = a,
+                    bestCost = cost;
+            }
+        }
     }
 
     /// @brief Attempts to subdivide a given BVH node.

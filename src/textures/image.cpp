@@ -18,13 +18,12 @@ class ImageTexture : public Texture {
     BorderMode m_border;
     FilterMode m_filter;
 
-    float clamp(float value) const {
-        float min_val = 0.f;
-        float max_val = 1.f;
+    int clamp(int value, int max_val) const {
+        int min_val = 0;
         return max(min_val, min(value, max_val));
     }
 
-    float repeat(float value) const { return value - floor(value); }
+    int repeat(int value, int hw) const { return ((value % hw) + hw) % hw; }
 
 public:
     ImageTexture(const Properties &properties) {
@@ -49,35 +48,50 @@ public:
     }
 
     Color evaluate(const Point2 &uv) const override {
-        float u = uv[0];
-        float v = -uv[1] + 1;
-        if (m_border == BorderMode::Clamp) {
-            u = clamp(u);
-            v = clamp(v);
-        } else if (m_border == BorderMode::Repeat) {
-            u = repeat(u);
-            v = repeat(v);
-        } else {
-            throw std::runtime_error("Invalid BorderMode value.");
-        }
-
+        float u    = uv[0];
+        float v    = -uv[1] + 1;
         int width  = m_image->resolution().x();
-        int height = m_image->resolution().x();
-        float x    = u * (width - 1);
-        float y    = v * (height - 1);
+        int height = m_image->resolution().y();
+        float x    = u * width;
+        float y    = v * height;
 
         if (m_filter == FilterMode::Nearest) {
-            int ix = round(x);
-            int iy = round(y);
+            int ix = floor(x);
+            int iy = floor(y);
+            if (m_border == BorderMode::Clamp) {
+                ix = clamp(ix, width - 1);
+                iy = clamp(iy, height - 1);
+            } else if (m_border == BorderMode::Repeat) {
+                ix = repeat(ix, width);
+                iy = repeat(iy, height);
+            } else {
+                throw std::runtime_error("Invalid BorderMode value.");
+            }
             return m_image->get(Point2i(ix, iy));
         } else if (m_filter == FilterMode::Bilinear) {
+            x      = x - 0.5;
+            y      = y - 0.5;
             int x0 = floor(x);
             int y0 = floor(y);
-            int x1 = min(x0 + 1, width - 1);
-            int y1 = min(y0 + 1, height - 1);
+            int x1 = x0 + 1;
+            int y1 = y0 + 1;
 
             float tx = x - x0;
             float ty = y - y0;
+
+            if (m_border == BorderMode::Clamp) {
+                x0 = clamp(x0, width - 1);
+                x1 = clamp(x1, width - 1);
+                y0 = clamp(y0, height - 1);
+                y1 = clamp(y1, height - 1);
+            } else if (m_border == BorderMode::Repeat) {
+                x0 = repeat(x0, width);
+                x1 = repeat(x1, width);
+                y0 = repeat(y0, height);
+                y1 = repeat(y1, height);
+            } else {
+                throw std::runtime_error("Invalid BorderMode value.");
+            }
 
             // Interpolate
             Color c00 = m_image->get(Point2i(x0, y0));
