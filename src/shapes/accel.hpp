@@ -189,24 +189,112 @@ class AccelerationStructure : public Shape {
      * @param out bestSplitPosition The optimal split position, undefined if no
      * useful split exists
      */
+    struct Bin {
+        Bounds aabb;
+        int primCount = 0;
+    };
+
     void binning(const Node &node, int &bestSplitAxis,
                  float &bestSplitPosition) {
-        float bestCost  = Infinity;
-        Point boundsMin = node.aabb.min();
-        Point boundsMax = node.aabb.max();
+        int num_bins   = 16;
+        float bestCost = Infinity;
+        std::cout << "Starting binning process...\n";
+
         for (int a = 0; a < 3; a++) {
-            if (boundsMin[a] == boundsMax[a])
+            Bounds bbox(TPoint<float, 3>(0.0f, 0.0f, 0.0f),
+                        TPoint<float, 3>(0.0f, 0.0f, 0.0f));
+            std::cout << "Processing axis " << a << "...\n";
+
+            int counter = 0;
+            // Error has to be here inside this loop
+            for (int i = 0; i < node.primitiveCount; i++) {
+                counter++;
+                Node prim = m_nodes[m_primitiveIndices[node.leftFirst + i]];
+                std::cout << "Here min is " << prim.aabb.min() << " max is "
+                          << prim.aabb.max() << "...\n";
+                bbox.extend(prim.aabb);
+                std::cout << "Here min is " << bbox.min() << " max is "
+                          << bbox.max() << "...\n";
+            }
+            // bbox.max and bbox.min are incorrect some times.
+            std::cout << "Here" << counter << "...\n";
+
+            std::cout << "bbox.min()[" << a << "] = " << bbox.min()[a]
+                      << ", bbox.max()[" << a << "] = " << bbox.max()[a]
+                      << "\n";
+
+            if (bbox.min()[a] == bbox.max()[a]) {
+                std::cout << "Skipping axis " << a << " as bbox min == max.\n";
                 continue;
-            float scale = (boundsMax[a] - boundsMin[a]) / 100;
-            for (uint i = 1; i < 100; i++) {
-                float candidatePos = boundsMin[a] + i * scale;
-                float cost         = 0;
-                // float cost         = EvaluateSAH(node, a, candidatePos);
-                if (cost < bestCost)
-                    bestSplitPosition = candidatePos, bestSplitAxis = a,
-                    bestCost = cost;
+            }
+
+            Bin bin[num_bins];
+            float scale = float(num_bins) / (bbox.max()[a] - bbox.min()[a]);
+            std::cout << "scale = " << scale << "\n";
+
+            for (int i = 0; i < node.primitiveCount; i++) {
+                Node prim = m_nodes[m_primitiveIndices[node.leftFirst + i]];
+                int binIdx =
+                    min(num_bins - 1,
+                        (int) ((getCentroid(
+                                    m_primitiveIndices[node.leftFirst + i])[a] -
+                                bbox.min()[a]) *
+                               scale));
+                bin[binIdx].primCount++;
+                bin[binIdx].aabb.extend(
+                    getBoundingBox(m_primitiveIndices[node.leftFirst + i]));
+            }
+
+            float leftArea[num_bins - 1], rightArea[num_bins - 1];
+            int leftCount[num_bins - 1], rightCount[num_bins - 1];
+            Bounds leftBox, rightBox;
+            int leftSum = 0, rightSum = 0;
+
+            std::cout << "Calculating left and right areas...\n";
+            for (int i = 0; i < num_bins - 1; i++) {
+                leftSum += bin[i].primCount;
+                leftCount[i] = leftSum;
+                leftBox.extend(bin[i].aabb);
+                float leftHeight = leftBox.max()[0] - leftBox.min()[0];
+                float leftWidth  = leftBox.max()[1] - leftBox.min()[1];
+                float leftDepth  = leftBox.max()[2] - leftBox.min()[2];
+                leftArea[i] = leftWidth * leftHeight + leftHeight * leftDepth +
+                              leftWidth * leftDepth;
+
+                rightSum += bin[num_bins - 1 - i].primCount;
+                rightCount[num_bins - 2 - i] = rightSum;
+                rightBox.extend(bin[num_bins - 1 - i].aabb);
+                float rightHeight = rightBox.max()[0] - rightBox.min()[0];
+                float rightWidth  = rightBox.max()[1] - rightBox.min()[1];
+                float rightDepth  = rightBox.max()[2] - rightBox.min()[2];
+                rightArea[num_bins - 2 - i] = rightWidth * rightHeight +
+                                              rightHeight * rightDepth +
+                                              rightWidth * rightDepth;
+            }
+
+            scale = (bbox.max()[a] - bbox.min()[a]) / num_bins;
+            std::cout << "New scale after area calculation: " << scale << "\n";
+
+            for (int i = 0; i < num_bins - 1; i++) {
+                float planeCost =
+                    leftCount[i] * leftArea[i] + rightCount[i] * rightArea[i];
+                std::cout << "planeCost for bin " << i << " = " << planeCost
+                          << "\n";
+
+                if (planeCost < bestCost) {
+                    bestSplitAxis     = a;
+                    bestSplitPosition = bbox.min()[a] + scale * (i + 1);
+                    bestCost          = planeCost;
+                    std::cout << "New best cost found: " << bestCost
+                              << " at axis " << bestSplitAxis
+                              << " and position " << bestSplitPosition << "\n";
+                }
             }
         }
+
+        std::cout << "Binning process complete. Best split: axis "
+                  << bestSplitAxis << " at position " << bestSplitPosition
+                  << " with cost " << bestCost << "\n";
     }
 
     /// @brief Attempts to subdivide a given BVH node.
@@ -217,7 +305,7 @@ class AccelerationStructure : public Shape {
         }
 
         // set to true when implementing binning
-        static constexpr bool UseSAH = false;
+        static constexpr bool UseSAH = true;
 
         int splitAxis = -1;
         float splitPosition;
@@ -235,10 +323,10 @@ class AccelerationStructure : public Shape {
             return;
         }
 
-        // the point at which to split (note that primitives must be re-ordered
-        // so that all children of the left node will have a smaller index than
-        // firstRightIndex, and nodes on the right will have an index larger or
-        // equal to firstRightIndex)
+        // the point at which to split (note that primitives must be
+        // re-ordered so that all children of the left node will have a
+        // smaller index than firstRightIndex, and nodes on the right will
+        // have an index larger or equal to firstRightIndex)
         NodeIndex firstRightIndex = parent.firstPrimitiveIndex();
         NodeIndex lastLeftIndex   = parent.lastPrimitiveIndex();
 
@@ -285,11 +373,11 @@ class AccelerationStructure : public Shape {
     }
 
 protected:
-    /// @brief Returns the number of children (individual shapes) that are part
-    /// of this acceleration structure.
+    /// @brief Returns the number of children (individual shapes) that are
+    /// part of this acceleration structure.
     virtual int numberOfPrimitives() const = 0;
-    /// @brief Intersect a single child (identified by the index) with the given
-    /// ray.
+    /// @brief Intersect a single child (identified by the index) with the
+    /// given ray.
     virtual bool intersect(int primitiveIndex, const Ray &ray,
                            Intersection &its, Sampler &rng) const = 0;
     /// @brief Returns the axis aligned bounding box of the given child.
@@ -324,8 +412,9 @@ public:
                    Sampler &rng) const override {
         if (m_primitiveIndices.empty())
             return false; // exit early if no children exist
-        if (intersectAABB(rootNode().aabb, ray) <
-            its.t) // test root bounding box for potential hit
+        if (intersectAABB(rootNode().aabb, ray) < its.t) // test root
+                                                         // bounding box for
+                                                         // potential hit
             return intersectNode(rootNode(), ray, its, rng);
         return false;
     }
