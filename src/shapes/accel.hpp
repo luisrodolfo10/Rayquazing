@@ -206,15 +206,22 @@ class AccelerationStructure : public Shape {
             std::cout << "Processing axis " << a << "...\n";
 
             int counter = 0;
-            // Error has to be here inside this loop
+            // ERROR: has to be here inside this loop, cause bbox.max and
+            // bbox.min are +inf and -inf
             for (int i = 0; i < node.primitiveCount; i++) {
                 counter++;
                 Node prim = m_nodes[m_primitiveIndices[node.leftFirst + i]];
-                std::cout << "Here min is " << prim.aabb.min() << " max is "
-                          << prim.aabb.max() << "...\n";
-                bbox.extend(prim.aabb);
-                std::cout << "Here min is " << bbox.min() << " max is "
-                          << bbox.max() << "...\n";
+                // These are too big, maybe its a problem of get bounding box of
+                // some shape or getCentroid?
+                if (prim.aabb.min()[a] > -1000000 &
+                    prim.aabb.max()[a] < 1000000) {
+                    bbox.extend(prim.aabb);
+                    // std::cout << "Here min is " << prim.aabb.min() << " max
+                    // is "
+                    //           << prim.aabb.max() << "...\n";
+                    // std::cout << "Here min is " << bbox.min() << " max is "
+                    //           << bbox.max() << "...\n";
+                }
             }
             // bbox.max and bbox.min are incorrect some times.
             std::cout << "Here" << counter << "...\n";
@@ -223,9 +230,9 @@ class AccelerationStructure : public Shape {
                       << ", bbox.max()[" << a << "] = " << bbox.max()[a]
                       << "\n";
 
-            if (bbox.min()[a] == bbox.max()[a]) {
+            if (abs(bbox.min()[a] - bbox.max()[a]) > 100000000) {
                 std::cout << "Skipping axis " << a << " as bbox min == max.\n";
-                continue;
+                break;
             }
 
             Bin bin[num_bins];
