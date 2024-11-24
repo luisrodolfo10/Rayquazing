@@ -196,112 +196,63 @@ class AccelerationStructure : public Shape {
 
     void binning(const Node &node, int &bestSplitAxis,
                  float &bestSplitPosition) {
-        const int num_bins = 16;
-        float bestCost     = Infinity;
-        bestSplitAxis      = -1;
-        std::cout << "Starting binning process...\n";
+        int num_bins   = 16;
+        float bestCost = Infinity;
 
-        for (int a = 0; a < 3; a++) {
-            std::cout << "Processing axis " << a << "...\n";
-            float boundsMin = 1e30f, boundsMax = -1e30f;
+        for (int axis = 0; axis < 3; axis++) {
+            // Initialize bins
+            Bin bins[num_bins];
 
-            // // Getting the boundsmin and boundsmax
+            // Bin primitives
+            for (int i = 0; i < node.primitiveCount; i++) {
+                int primIdx    = m_primitiveIndices[node.leftFirst + i];
+                Point primCent = getCentroid(primIdx);
+                Bounds bbox    = node.aabb;
 
-            // for (NodeIndex i = node.firstPrimitiveIndex();
-            //      i < node.lastPrimitiveIndex();
-            //      i++) {
-            //     int primIdx = m_primitiveIndices[node.leftFirst + i];
-            //     boundsMin   = std::min(boundsMin, getCentroid(primIdx)[a]);
-            //     boundsMax   = std::max(boundsMax, getCentroid(primIdx)[a]);
-            // }
-            // Getting different results with this two methods of boundsmax and
-            // boundsmin
+                if (bbox.max()[axis] == bbox.min()[axis]) {
+                    continue;
+                }
 
-            boundsMax = node.aabb.max()[a];
-            boundsMin = node.aabb.min()[a];
-
-            if (boundsMin == boundsMax) {
-                continue;
-            }
-            std::cout << "Got the bounds min and boundsmax " << "...\n";
-
-            std::array<Bin, num_bins> bin;
-            float scale = num_bins / (boundsMax - boundsMin);
-            // std::cout << "prim count: " << node.primitiveCount << "...\n";
-            for (NodeIndex i = node.firstPrimitiveIndex();
-                 i < node.lastPrimitiveIndex();
-                 i++) {
-                int primIdx = m_primitiveIndices[i];
-                // Node prim   = m_nodes[primIdx];   Crashing due to this??
-                // why?? ask tutors
-                int binIdx =
-                    min(num_bins - 1,
-                        int((getCentroid(primIdx)[a] - boundsMin) * scale));
-
-                binIdx = std::clamp(binIdx, 0, num_bins - 1);
-
-                bin[binIdx].primCount++;
-                bin[binIdx].aabb.extend(getBoundingBox(primIdx));
+                // Map the centroid to a bin
+                float scale = 1 / (bbox.max()[axis] - bbox.min()[axis]);
+                int binIdx  = min(num_bins - 1,
+                                 int((primCent[axis] - bbox.min()[axis]) *
+                                     scale * num_bins));
+                bins[binIdx].primCount++;
+                bins[binIdx].aabb.extend(getBoundingBox(primIdx));
             }
 
-            std::cout << "Populated the bins " << "...\n";
-
-            // Arrays for left and right areas/counts
-            float leftArea[num_bins - 1]  = {};
-            float rightArea[num_bins - 1] = {};
-            int leftCount[num_bins - 1]   = {};
-            int rightCount[num_bins - 1]  = {};
-
+            float leftArea[num_bins - 1], rightArea[num_bins - 1];
+            int leftCount[num_bins - 1], rightCount[num_bins - 1];
             Bounds leftBox = Bounds::empty(), rightBox = Bounds::empty();
             int leftSum = 0, rightSum = 0;
 
-            std::cout << "Calculating left and right areas...\n";
-            // Calculating left and Right
-
             for (int i = 0; i < num_bins - 1; i++) {
-                leftSum += bin[i].primCount;
+                leftSum += bins[i].primCount;
                 leftCount[i] = leftSum;
-                leftBox.extend(bin[i].aabb);
+                leftBox.extend(bins[i].aabb);
                 leftArea[i] = surfaceArea(leftBox);
 
-                rightSum += bin[num_bins - 2 - i].primCount;
+                rightSum += bins[num_bins - 1 - i].primCount;
                 rightCount[num_bins - 2 - i] = rightSum;
-                rightBox.extend(bin[num_bins - 2 - i].aabb);
+                rightBox.extend(bins[num_bins - 1 - i].aabb);
                 rightArea[num_bins - 2 - i] = surfaceArea(rightBox);
             }
 
-            // for (int i = 0; i < num_bins - 1; i++) {
-            //     leftSum += bin[i].primCount;
-            //     leftCount[i] = leftSum;
-            //     leftBox.extend(bin[i].aabb);
-            //     leftArea[i] = surfaceArea(leftBox);
-            // }
+            float scale =
+                (node.aabb.max()[axis] - node.aabb.min()[axis]) / num_bins;
 
-            // for (int i = num_bins - 1; i > 0; i--) {
-            //     rightSum += bin[i].primCount;
-            //     rightCount[i - 1] = rightSum;
-            //     rightBox.extend(bin[i].aabb);
-            //     rightArea[i - 1] = surfaceArea(rightBox);
-            // }
-
-            scale = (boundsMax - boundsMin) / num_bins;
-            std::cout << "New scale after area calculation: " << scale << "\n";
-
+            // Compute SAH and find the best split
             for (int i = 0; i < num_bins - 1; i++) {
                 float planeCost =
                     leftCount[i] * leftArea[i] + rightCount[i] * rightArea[i];
 
                 if (planeCost < bestCost) {
-                    bestSplitAxis     = a;
-                    bestSplitPosition = boundsMin + scale * (i + 1);
+                    bestSplitAxis     = axis;
+                    bestSplitPosition = node.aabb.min()[axis] + scale * (i + 1);
                     bestCost          = planeCost;
                 }
             }
-        }
-        // If no useful split is found
-        if (bestCost == Infinity) {
-            bestSplitAxis     = -1;
-            bestSplitPosition = 0.0f;
         }
     }
 
