@@ -23,7 +23,15 @@ class ImageTexture : public Texture {
         return max(min_val, min(value, max_val));
     }
 
-    int repeat(int value, int hw) const { return ((value % hw) + hw) % hw; }
+    int repeat(int value, int hw) const {
+        // int mod = value % hw;
+        // if (mod < 0) {
+        //     return (hw + mod) % hw;
+        // }
+        // return mod;
+        return ((value % hw) + hw) %
+               hw; // Works with both positive and negative mod
+    }
 
 public:
     ImageTexture(const Properties &properties) {

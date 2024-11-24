@@ -190,118 +190,119 @@ class AccelerationStructure : public Shape {
      * useful split exists
      */
     struct Bin {
-        Bounds aabb;
+        Bounds aabb   = Bounds::empty();
         int primCount = 0;
     };
 
     void binning(const Node &node, int &bestSplitAxis,
                  float &bestSplitPosition) {
-        int num_bins   = 16;
-        float bestCost = Infinity;
+        const int num_bins = 16;
+        float bestCost     = Infinity;
+        bestSplitAxis      = -1;
         std::cout << "Starting binning process...\n";
 
         for (int a = 0; a < 3; a++) {
-            Bounds bbox(TPoint<float, 3>(0.0f, 0.0f, 0.0f),
-                        TPoint<float, 3>(0.0f, 0.0f, 0.0f));
             std::cout << "Processing axis " << a << "...\n";
+            float boundsMin = 1e30f, boundsMax = -1e30f;
 
-            int counter = 0;
-            // ERROR: has to be here inside this loop, cause bbox.max and
-            // bbox.min are +inf and -inf
-            for (int i = 0; i < node.primitiveCount; i++) {
-                counter++;
-                Node prim = m_nodes[m_primitiveIndices[node.leftFirst + i]];
-                // These are too big, maybe its a problem of get bounding box of
-                // some shape or getCentroid?
-                if (prim.aabb.min()[a] > -1000000 &
-                    prim.aabb.max()[a] < 1000000) {
-                    bbox.extend(prim.aabb);
-                    // std::cout << "Here min is " << prim.aabb.min() << " max
-                    // is "
-                    //           << prim.aabb.max() << "...\n";
-                    // std::cout << "Here min is " << bbox.min() << " max is "
-                    //           << bbox.max() << "...\n";
-                }
+            // // Getting the boundsmin and boundsmax
+
+            // for (NodeIndex i = node.firstPrimitiveIndex();
+            //      i < node.lastPrimitiveIndex();
+            //      i++) {
+            //     int primIdx = m_primitiveIndices[node.leftFirst + i];
+            //     boundsMin   = std::min(boundsMin, getCentroid(primIdx)[a]);
+            //     boundsMax   = std::max(boundsMax, getCentroid(primIdx)[a]);
+            // }
+            // Getting different results with this two methods of boundsmax and
+            // boundsmin
+
+            boundsMax = node.aabb.max()[a];
+            boundsMin = node.aabb.min()[a];
+
+            if (boundsMin == boundsMax) {
+                continue;
             }
-            // bbox.max and bbox.min are incorrect some times.
-            std::cout << "Here" << counter << "...\n";
+            std::cout << "Got the bounds min and boundsmax " << "...\n";
 
-            std::cout << "bbox.min()[" << a << "] = " << bbox.min()[a]
-                      << ", bbox.max()[" << a << "] = " << bbox.max()[a]
-                      << "\n";
-
-            if (abs(bbox.min()[a] - bbox.max()[a]) > 100000000) {
-                std::cout << "Skipping axis " << a << " as bbox min == max.\n";
-                break;
-            }
-
-            Bin bin[num_bins];
-            float scale = float(num_bins) / (bbox.max()[a] - bbox.min()[a]);
-            std::cout << "scale = " << scale << "\n";
-
-            for (int i = 0; i < node.primitiveCount; i++) {
-                Node prim = m_nodes[m_primitiveIndices[node.leftFirst + i]];
+            std::array<Bin, num_bins> bin;
+            float scale = num_bins / (boundsMax - boundsMin);
+            // std::cout << "prim count: " << node.primitiveCount << "...\n";
+            for (NodeIndex i = node.firstPrimitiveIndex();
+                 i < node.lastPrimitiveIndex();
+                 i++) {
+                int primIdx = m_primitiveIndices[i];
+                // Node prim   = m_nodes[primIdx];   Crashing due to this??
+                // why?? ask tutors
                 int binIdx =
                     min(num_bins - 1,
-                        (int) ((getCentroid(
-                                    m_primitiveIndices[node.leftFirst + i])[a] -
-                                bbox.min()[a]) *
-                               scale));
+                        int((getCentroid(primIdx)[a] - boundsMin) * scale));
+
+                binIdx = std::clamp(binIdx, 0, num_bins - 1);
+
                 bin[binIdx].primCount++;
-                bin[binIdx].aabb.extend(
-                    getBoundingBox(m_primitiveIndices[node.leftFirst + i]));
+                bin[binIdx].aabb.extend(getBoundingBox(primIdx));
             }
 
-            float leftArea[num_bins - 1], rightArea[num_bins - 1];
-            int leftCount[num_bins - 1], rightCount[num_bins - 1];
-            Bounds leftBox, rightBox;
+            std::cout << "Populated the bins " << "...\n";
+
+            // Arrays for left and right areas/counts
+            float leftArea[num_bins - 1]  = {};
+            float rightArea[num_bins - 1] = {};
+            int leftCount[num_bins - 1]   = {};
+            int rightCount[num_bins - 1]  = {};
+
+            Bounds leftBox = Bounds::empty(), rightBox = Bounds::empty();
             int leftSum = 0, rightSum = 0;
 
             std::cout << "Calculating left and right areas...\n";
+            // Calculating left and Right
+
             for (int i = 0; i < num_bins - 1; i++) {
                 leftSum += bin[i].primCount;
                 leftCount[i] = leftSum;
                 leftBox.extend(bin[i].aabb);
-                float leftHeight = leftBox.max()[0] - leftBox.min()[0];
-                float leftWidth  = leftBox.max()[1] - leftBox.min()[1];
-                float leftDepth  = leftBox.max()[2] - leftBox.min()[2];
-                leftArea[i] = leftWidth * leftHeight + leftHeight * leftDepth +
-                              leftWidth * leftDepth;
+                leftArea[i] = surfaceArea(leftBox);
 
-                rightSum += bin[num_bins - 1 - i].primCount;
+                rightSum += bin[num_bins - 2 - i].primCount;
                 rightCount[num_bins - 2 - i] = rightSum;
-                rightBox.extend(bin[num_bins - 1 - i].aabb);
-                float rightHeight = rightBox.max()[0] - rightBox.min()[0];
-                float rightWidth  = rightBox.max()[1] - rightBox.min()[1];
-                float rightDepth  = rightBox.max()[2] - rightBox.min()[2];
-                rightArea[num_bins - 2 - i] = rightWidth * rightHeight +
-                                              rightHeight * rightDepth +
-                                              rightWidth * rightDepth;
+                rightBox.extend(bin[num_bins - 2 - i].aabb);
+                rightArea[num_bins - 2 - i] = surfaceArea(rightBox);
             }
 
-            scale = (bbox.max()[a] - bbox.min()[a]) / num_bins;
+            // for (int i = 0; i < num_bins - 1; i++) {
+            //     leftSum += bin[i].primCount;
+            //     leftCount[i] = leftSum;
+            //     leftBox.extend(bin[i].aabb);
+            //     leftArea[i] = surfaceArea(leftBox);
+            // }
+
+            // for (int i = num_bins - 1; i > 0; i--) {
+            //     rightSum += bin[i].primCount;
+            //     rightCount[i - 1] = rightSum;
+            //     rightBox.extend(bin[i].aabb);
+            //     rightArea[i - 1] = surfaceArea(rightBox);
+            // }
+
+            scale = (boundsMax - boundsMin) / num_bins;
             std::cout << "New scale after area calculation: " << scale << "\n";
 
             for (int i = 0; i < num_bins - 1; i++) {
                 float planeCost =
                     leftCount[i] * leftArea[i] + rightCount[i] * rightArea[i];
-                std::cout << "planeCost for bin " << i << " = " << planeCost
-                          << "\n";
 
                 if (planeCost < bestCost) {
                     bestSplitAxis     = a;
-                    bestSplitPosition = bbox.min()[a] + scale * (i + 1);
+                    bestSplitPosition = boundsMin + scale * (i + 1);
                     bestCost          = planeCost;
-                    std::cout << "New best cost found: " << bestCost
-                              << " at axis " << bestSplitAxis
-                              << " and position " << bestSplitPosition << "\n";
                 }
             }
         }
-
-        std::cout << "Binning process complete. Best split: axis "
-                  << bestSplitAxis << " at position " << bestSplitPosition
-                  << " with cost " << bestCost << "\n";
+        // If no useful split is found
+        if (bestCost == Infinity) {
+            bestSplitAxis     = -1;
+            bestSplitPosition = 0.0f;
+        }
     }
 
     /// @brief Attempts to subdivide a given BVH node.
