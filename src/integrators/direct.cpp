@@ -31,6 +31,7 @@ public:
             secondaryRay.origin       = its.position;
             secondaryRay.direction    = directSample.wi;
             Intersection secondaryIts = m_scene->intersect(secondaryRay, rng);
+            Color contribution;
             // And if the light is not occluded add its contribution weighted by
             // the bsdf value at the first intersection.
             if (!secondaryIts || secondaryIts.t > directSample.distance) {
@@ -38,12 +39,39 @@ public:
                     std::max(0.f, its.shadingNormal.dot(directSample.wi));
                 BsdfEval bsdf = its.evaluateBsdf(directSample.wi);
                 if (!bsdf.isInvalid()) {
-                    Color contribution =
-                        directSample.weight * bsdf.value * cosTheta;
+                    contribution = directSample.weight * bsdf.value * cosTheta /
+                                   lightSample.probability;
                     return contribution;
                 }
             }
-            return Color(0.f);
+            // There is an intersection with a surface, but this surface also
+            // emits light. (Soft shadow)
+            BsdfSample bsdfSample = its.sampleBsdf(rng);
+            if (!bsdfSample.isInvalid()) {
+                // Trace a secondary ray in the sampled BSDF direction.
+                Ray bsdfRay;
+                bsdfRay.origin            = its.position;
+                bsdfRay.direction         = bsdfSample.wi;
+                Intersection secondaryIts = m_scene->intersect(bsdfRay, rng);
+
+                if (secondaryIts) {
+                    // If the secondary ray hits an emissive surface, evaluate
+                    // its emission.
+                    Color emissiveContribution =
+                        secondaryIts.evaluateEmission().value;
+                    float cosTheta =
+                        std::max(0.f, its.shadingNormal.dot(bsdfSample.wi));
+                    contribution += bsdfSample.weight * emissiveContribution *
+                                    cosTheta / lightSample.probability;
+                } else {
+                    // If no surface was hit, add the background light
+                    // contribution.
+                    Color backgroundContribution = its.evaluateEmission().value;
+                    contribution += bsdfSample.weight * backgroundContribution /
+                                    lightSample.probability;
+                }
+            }
+            return emission + contribution;
         } else {
             // If no surface interaction was found, add the contribution of the
             // background environment map (if any). For this you can use the

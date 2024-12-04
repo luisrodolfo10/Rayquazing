@@ -11,7 +11,8 @@ public:
     }
 
     EmissionEval evaluate(const Point2 &uv, const Vector &wo) const override {
-        NOT_IMPLEMENTED
+        Color emission_color = Color(m_emission->evaluate(uv));
+        return EmissionEval{ emission_color };
     }
 
     std::string toString() const override {

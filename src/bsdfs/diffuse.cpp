@@ -14,12 +14,33 @@ public:
                       const Vector &wi) const override {
         Color color   = Color(m_albedo->evaluate(uv) / Pi);
         BsdfEval bsdf = BsdfEval();
-        bsdf.value    = color;
+
+        if (wo.z() * wi.z() <= 0.0f) {
+            return bsdf.invalid();
+        }
+        bsdf.value = color;
         return BsdfEval(bsdf);
     }
 
     BsdfSample sample(const Point2 &uv, const Vector &wo,
-                      Sampler &rng) const override{ NOT_IMPLEMENTED }
+                      Sampler &rng) const override {
+        // Sample a ray direction
+        Vector wi = squareToCosineHemisphere(rng.next2D());
+        // Assign the correct weight to the sample: evaluation of the BSDF
+        // itself (how much light is reflect) multiplied by the foreshortening
+        // term cos 𝜔𝑖
+        BsdfEval bsdfEval = evaluate(uv, wo, wi);
+        // Compute the cosine term (dot product of wi and surface normal)
+        float cosTheta = wi.z();
+        // Scale by the inverse of the probability of having sampled that ray
+        float pdf    = cosineHemispherePdf(wi);
+        Color weight = bsdfEval.value * cosTheta / pdf;
+
+        BsdfSample bsdfSample = BsdfSample();
+        bsdfSample.weight     = weight;
+        bsdfSample.wi         = wi;
+        return bsdfSample;
+    }
 
     std::string toString() const override {
         return tfm::format(
