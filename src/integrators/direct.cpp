@@ -15,7 +15,11 @@ public:
         // Determine if the ray intersects any surfaces in the scene.
         Intersection its = m_scene->intersect(ray, rng);
         if (its) {
+            Color contribution;
             Color emission = its.evaluateEmission().value;
+            if (!m_scene->hasLights()) {
+                contribution += emission;
+            }
 
             // If a surface intersection occurs, you will need to get a light
             // sample using the provided sampleLight function. Then, get its
@@ -23,27 +27,30 @@ public:
             // distance) using the 𝑖 sampleDirect function of the light
             // associated with the light sample.
             LightSample lightSample = m_scene->sampleLight(rng);
-            DirectLightSample directSample =
-                lightSample.light->sampleDirect(its.position, rng);
+            if (lightSample.probability > 0) {
+                DirectLightSample directSample =
+                    lightSample.light->sampleDirect(its.position, rng);
 
-            // Trace a secondary ray in the direction of the light.
-            Ray secondaryRay;
-            secondaryRay.origin       = its.position;
-            secondaryRay.direction    = directSample.wi;
-            Intersection secondaryIts = m_scene->intersect(secondaryRay, rng);
-            Color contribution;
-            // And if the light is not occluded add its contribution weighted by
-            // the bsdf value at the first intersection.
-            if (!secondaryIts || secondaryIts.t > directSample.distance) {
-                float cosTheta =
-                    std::max(0.f, its.shadingNormal.dot(directSample.wi));
-                BsdfEval bsdf = its.evaluateBsdf(directSample.wi);
-                if (!bsdf.isInvalid()) {
-                    contribution = directSample.weight * bsdf.value * cosTheta /
-                                   lightSample.probability;
-                    return contribution;
+                // Trace a secondary ray in the direction of the light.
+                Ray secondaryRay;
+                secondaryRay.origin    = its.position;
+                secondaryRay.direction = directSample.wi;
+                Intersection secondaryIts =
+                    m_scene->intersect(secondaryRay, rng);
+
+                // And if the light is not occluded add its contribution
+                // weighted by the bsdf value at the first intersection.
+                if (!secondaryIts || secondaryIts.t > directSample.distance) {
+                    float cosTheta =
+                        std::max(0.f, its.shadingNormal.dot(directSample.wi));
+                    BsdfEval bsdf = its.evaluateBsdf(directSample.wi);
+                    if (!bsdf.isInvalid()) {
+                        contribution += directSample.weight * bsdf.value *
+                                       cosTheta / lightSample.probability;
+                    }
                 }
             }
+
             // There is an intersection with a surface, but this surface also
             // emits light. (Soft shadow)
             BsdfSample bsdfSample = its.sampleBsdf(rng);
@@ -59,19 +66,10 @@ public:
                     // its emission.
                     Color emissiveContribution =
                         secondaryIts.evaluateEmission().value;
-                    float cosTheta =
-                        std::max(0.f, its.shadingNormal.dot(bsdfSample.wi));
-                    contribution += bsdfSample.weight * emissiveContribution *
-                                    cosTheta / lightSample.probability;
-                } else {
-                    // If no surface was hit, add the background light
-                    // contribution.
-                    Color backgroundContribution = its.evaluateEmission().value;
-                    contribution += bsdfSample.weight * backgroundContribution /
-                                    lightSample.probability;
+                    contribution += bsdfSample.weight * emissiveContribution;
                 }
             }
-            return emission + contribution;
+            return contribution;
         } else {
             // If no surface interaction was found, add the contribution of the
             // background environment map (if any). For this you can use the

@@ -15,7 +15,7 @@ public:
         Color color   = Color(m_albedo->evaluate(uv) / Pi);
         BsdfEval bsdf = BsdfEval();
 
-        if (wo.z() * wi.z() <= 0.0f) {
+        if (Frame::sameHemisphere(wo, wi)) {
             return bsdf.invalid();
         }
         bsdf.value = color;
@@ -33,12 +33,14 @@ public:
         // Compute the cosine term (dot product of wi and surface normal)
         float cosTheta = wi.z();
         // Scale by the inverse of the probability of having sampled that ray
-        float pdf    = cosineHemispherePdf(wi);
-        Color weight = bsdfEval.value * cosTheta / pdf;
+        // float pdf = cosineHemispherePdf(wi);
+
+        Color weight = m_albedo->evaluate(uv); // cosTheta / pdf;
 
         BsdfSample bsdfSample = BsdfSample();
         bsdfSample.weight     = weight;
         bsdfSample.wi         = wi;
+
         return bsdfSample;
     }
 
