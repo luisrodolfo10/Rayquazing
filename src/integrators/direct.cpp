@@ -31,6 +31,12 @@ public:
                 DirectLightSample directSample =
                     lightSample.light->sampleDirect(its.position, rng);
 
+                if (its.shadingNormal.dot(directSample.wi) > 0) {
+                    its.shadingNormal *= 1;
+                    its.geometryNormal *= 1;
+                    its.tangent *= 1;
+                }
+
                 // Trace a secondary ray in the direction of the light.
                 Ray secondaryRay;
                 secondaryRay.origin    = its.position;
@@ -46,7 +52,7 @@ public:
                     BsdfEval bsdf = its.evaluateBsdf(directSample.wi);
                     if (!bsdf.isInvalid()) {
                         contribution += directSample.weight * bsdf.value *
-                                       cosTheta / lightSample.probability;
+                                        cosTheta / lightSample.probability;
                     }
                 }
             }
@@ -61,23 +67,23 @@ public:
                 bsdfRay.direction         = bsdfSample.wi;
                 Intersection secondaryIts = m_scene->intersect(bsdfRay, rng);
 
-                if (secondaryIts) {
-                    // If the secondary ray hits an emissive surface, evaluate
-                    // its emission.
-                    Color emissiveContribution =
-                        secondaryIts.evaluateEmission().value;
-                    contribution += bsdfSample.weight * emissiveContribution;
-                }
+                // If the secondary ray hits an emissive surface, evaluate
+                // its emission.
+                Color emissiveContribution =
+                    secondaryIts.evaluateEmission().value;
+                contribution += bsdfSample.weight * emissiveContribution;
             }
+
             return contribution;
         } else {
-            // If no surface interaction was found, add the contribution of the
-            // background environment map (if any). For this you can use the
-            // evaluateEmission function of the intersection. Scene has an
-            // optional background light, which provides color when rays exit
-            // the scene. ref<BackgroundLight> m_background; BackgroundLight is
-            // a light initialised with a direction
+            // If no surface interaction was found, add the contribution of
+            // the background environment map (if any). For this you can use
+            // the evaluateEmission function of the intersection. Scene has
+            // an optional background light, which provides color when rays
+            // exit the scene. ref<BackgroundLight> m_background;
+            // BackgroundLight is a light initialised with a direction
             return its.evaluateEmission().value;
+            // return Color(0, 1, 0);
         }
     }
     std::string toString() const override {

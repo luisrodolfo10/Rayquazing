@@ -11,6 +11,9 @@ public:
     }
 
     EmissionEval evaluate(const Point2 &uv, const Vector &wo) const override {
+        if (wo.z() <= 0) {
+            return EmissionEval{ Color(0) };
+        }
         Color emission_color = Color(m_emission->evaluate(uv));
         return EmissionEval{ emission_color };
     }

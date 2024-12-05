@@ -23,9 +23,10 @@ void Instance::transformFrame(SurfaceEvent &surf, const Vector &wo) const {
     // }
 
     surf.tangent = shadingFrame.tangent;
-    surf.geometryNormal =
-        shadingFrame.bitangent.cross(shadingFrame.tangent).normalized();
-    surf.shadingNormal = surf.geometryNormal;
+    // surf.geometryNormal =
+    //     shadingFrame.bitangent.cross(shadingFrame.tangent).normalized();
+    surf.geometryNormal = shadingFrame.normal;
+    surf.shadingNormal  = surf.geometryNormal;
 }
 
 inline void validateIntersection(const Intersection &its) {
@@ -90,19 +91,19 @@ bool Instance::intersect(const Ray &worldRay, Intersection &its,
         its.t = its.t / scale_t;
 
         // Checking if normal is flipped
-        if (its.geometryNormal.dot(localRay.direction) > 0) {
-            its.geometryNormal *= -1;
-            its.shadingNormal *= -1;
-            its.tangent *= -1;
-        }
+        // if (its.geometryNormal.dot(localRay.direction) > 0) {
+        //     its.geometryNormal *= -1;
+        //     its.shadingNormal *= -1;
+        //     its.tangent *= -1;
+        // }
         its.position = m_transform->apply(its.position);
         transformFrame(its, -localRay.direction);
         // Checking if normal is flipped
-        if (its.geometryNormal.dot(worldRay.direction) > 0) {
-            its.geometryNormal *= -1;
-            its.shadingNormal *= -1;
-            its.tangent *= -1;
-        }
+        // if (its.geometryNormal.dot(worldRay.direction) > 0) {
+        //     its.geometryNormal *= -1;
+        //     its.shadingNormal *= -1;
+        //     its.tangent *= -1;
+        // }
     } else {
         its.t = previousT;
     }

@@ -20,14 +20,24 @@ public:
 
     BsdfSample sample(const Point2 &uv, const Vector &wo,
                       Sampler &rng) const override {
-        NOT_IMPLEMENTED
+        Vector n = Vector(0, 0, 1); // Local shading normal
+
+        Color weight = m_reflectance->evaluate(uv);
+        Vector wi    = reflect(wo, n).normalized();
+
+        BsdfSample bsdfSample = BsdfSample();
+        bsdfSample.weight     = weight;
+        bsdfSample.wi         = wi;
+
+        return bsdfSample;
     }
 
     std::string toString() const override {
-        return tfm::format("Conductor[\n"
-                           "  reflectance = %s\n"
-                           "]",
-                           indent(m_reflectance));
+        return tfm::format(
+            "Conductor[\n"
+            "  reflectance = %s\n"
+            "]",
+            indent(m_reflectance));
     }
 };
 

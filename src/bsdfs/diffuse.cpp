@@ -29,9 +29,9 @@ public:
         // Assign the correct weight to the sample: evaluation of the BSDF
         // itself (how much light is reflect) multiplied by the foreshortening
         // term cos 𝜔𝑖
-        BsdfEval bsdfEval = evaluate(uv, wo, wi);
+        // BsdfEval bsdfEval = evaluate(uv, wo, wi);
         // Compute the cosine term (dot product of wi and surface normal)
-        float cosTheta = wi.z();
+        // float cosTheta = wi.z();
         // Scale by the inverse of the probability of having sampled that ray
         // float pdf = cosineHemispherePdf(wi);
 
