@@ -34,6 +34,9 @@ public:
         // float cosThetao = abs(wo.z());
         float cosThetai = Frame::absCosTheta(wi);
         float cosThetao = Frame::absCosTheta(wo);
+        if (cosThetai == 0 || cosThetao == 0) {
+            return BsdfEval(); // Invalid
+        }
         // float cosThetai = std::max(0.0f, Frame::cosTheta(wi));
         // float cosThetao = std::max(0.0f, Frame::cosTheta(wo));
 
@@ -50,26 +53,10 @@ public:
         Vector wh = microfacet::sampleGGXVNDF(alpha, wo, rng.next2D());
         Vector wi = reflect(wo, wh).normalized(); // wi has the jacobian term
 
-        float jacobian = microfacet::detReflection(wh, wo);
-        float pdfWi    = microfacet::pdfGGXVNDF(alpha, wh, wo);
-
-        Color R = m_reflectance->evaluate(uv);
-        float D = microfacet::evaluateGGX(alpha, wh);
-        // float G   = microfacet::smithG1(alpha, wh, wo);
+        Color R   = m_reflectance->evaluate(uv);
         float Gwi = microfacet::smithG1(alpha, wh, wi);
-        float Gwo = microfacet::smithG1(alpha, wh, wo);
 
-        float cosThetai = Frame::absCosTheta(wi);
-        float cosThetao = Frame::absCosTheta(wo);
-
-        // Color weight = (R * D * Gwo * abs(wh.dot(wo))) / cosThetao;
-        // Color weight = (R * D * Gwi * Gwo) / (4 * cosThetai * cosThetao);
-        // weight /= pdfWi / jacobian;
-
-        Color weight = (Gwi * m_reflectance->evaluate(uv));
-
-        //  float fresnel = schlickWeight(Frame::absCosTheta(wh));
-        //  Color weight = (R * D * Gwo) * abs(wh.dot(wo));
+        Color weight = (R * Gwi); // Simplifying the equation has /costhetai
 
         BsdfSample bsdfSample = BsdfSample();
         bsdfSample.weight     = weight;

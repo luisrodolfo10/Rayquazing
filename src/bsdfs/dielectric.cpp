@@ -35,7 +35,7 @@ public:
         }
         float fresnelReflectance = fresnelDielectric(cosTheta, eta);
 
-        if (rng.next() < fresnelReflectance) {
+        if (rng.next() > fresnelReflectance) {
             weight = m_reflectance->evaluate(uv);
             wi     = reflect(wo, n);
         } else {

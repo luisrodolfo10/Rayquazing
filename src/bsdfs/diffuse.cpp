@@ -16,9 +16,9 @@ public:
             Color(m_albedo->evaluate(uv) / Pi); // * std::max(0.0f, wi.z());
         // Color color   = Color(m_albedo->evaluate(uv));
         BsdfEval bsdf = BsdfEval();
-        if (!Frame::sameHemisphere(wo, wi)) {
-            return bsdf.invalid();
-        }
+        // if (!Frame::sameHemisphere(wo, wi)) {
+        //     return bsdf.invalid();
+        // }
         bsdf.value = color;
         return BsdfEval(bsdf);
     }
