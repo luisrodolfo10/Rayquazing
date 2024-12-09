@@ -31,10 +31,9 @@ public:
                 DirectLightSample directSample =
                     lightSample.light->sampleDirect(its.position, rng);
 
+                // Vector flippedNormal = its.shadingNormal;
                 // if (its.shadingNormal.dot(directSample.wi) < 0) {
-                //     its.shadingNormal *= -1;
-                //     its.geometryNormal *= -1;
-                //     its.tangent *= -1;
+                //     flippedNormal = -its.shadingNormal;
                 // }
 
                 // Trace a secondary ray in the direction of the light.
@@ -47,15 +46,14 @@ public:
                 // And if the light is not occluded add its contribution
                 // weighted by the bsdf value at the first intersection.
                 if (!secondaryIts || secondaryIts.t > directSample.distance) {
-                    // if (its.shadingNormal.dot(directSample.wi) < 0) {
-                    //     directSample.wi *= -1;
-                    // }
-                    float cosTheta =
-                        std::max(0.f, its.shadingNormal.dot(directSample.wi));
+                    // float cosTheta =
+                    //     std::max(0.f, flippedNormal.dot(directSample.wi));
                     BsdfEval bsdf = its.evaluateBsdf(directSample.wi);
                     if (!bsdf.isInvalid()) {
-                        contribution += directSample.weight * bsdf.value *
-                                        cosTheta / lightSample.probability;
+                        // contribution += directSample.weight * bsdf.value *
+                        //                 cosTheta / lightSample.probability;
+                        contribution += directSample.weight * bsdf.value /
+                                        lightSample.probability;
                     }
                 }
             }

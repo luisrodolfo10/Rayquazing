@@ -12,8 +12,8 @@ public:
 
     BsdfEval evaluate(const Point2 &uv, const Vector &wo,
                       const Vector &wi) const override {
-        Color color =
-            Color(m_albedo->evaluate(uv) / Pi); //* std::max(0.0f, wi.z());
+        Color color = Color(m_albedo->evaluate(uv) / Pi); //* abs(wi.z());
+        color *= abs(wi.z());
         // Color color   = Color(m_albedo->evaluate(uv));
         BsdfEval bsdf = BsdfEval();
         // if (!Frame::sameHemisphere(wo, wi)) {
@@ -40,6 +40,11 @@ public:
         //     // wi[2] = -wi.z(); // Flip the direction
         //     wi = -wi;
         // }
+        // Vector n = Vector(0, 0, 1);
+        // if (!Frame::sameHemisphere(wo, wi)) {
+        //     wi = reflect(wi, n);
+        // }
+
         Color weight = m_albedo->evaluate(uv); // cosTheta / pdf;
 
         BsdfSample bsdfSample = BsdfSample();
