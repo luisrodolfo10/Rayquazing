@@ -196,8 +196,8 @@ class AccelerationStructure : public Shape {
 
     void binning(const Node &node, int &bestSplitAxis,
                  float &bestSplitPosition) {
-        int num_bins   = 16;
-        float bestCost = Infinity;
+        const int num_bins = 16;
+        float bestCost     = Infinity;
 
         for (int axis = 0; axis < 3; axis++) {
             // Initialize bins

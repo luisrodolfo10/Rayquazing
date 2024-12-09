@@ -50,7 +50,8 @@ public:
                       Sampler &rng) const override {
         const auto alpha = std::max(float(1e-3), sqr(m_roughness->scalar(uv)));
         // Normalized
-        Vector wh = microfacet::sampleGGXVNDF(alpha, wo, rng.next2D());
+        Vector wh =
+            microfacet::sampleGGXVNDF(alpha, wo, rng.next2D()).normalized();
         Vector wi = reflect(wo, wh).normalized(); // wi has the jacobian term
 
         Color R   = m_reflectance->evaluate(uv);
