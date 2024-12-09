@@ -23,11 +23,11 @@ public:
         Vector n = Vector(0, 0, 1); // Local shading normal
 
         Color weight = m_reflectance->evaluate(uv);
-        Vector wi    = reflect(wo, n).normalized();
+        Vector wi    = reflect(wo, n);
 
         BsdfSample bsdfSample = BsdfSample();
         bsdfSample.weight     = weight;
-        bsdfSample.wi         = wi;
+        bsdfSample.wi         = wi.normalized();
 
         return bsdfSample;
     }

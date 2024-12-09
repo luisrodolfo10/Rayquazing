@@ -45,7 +45,7 @@ public:
 
         BsdfSample bsdfSample = BsdfSample();
         bsdfSample.weight     = weight;
-        bsdfSample.wi         = wi;
+        bsdfSample.wi         = wi.normalized();
 
         return bsdfSample;
     }
