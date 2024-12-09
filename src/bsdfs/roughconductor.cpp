@@ -62,11 +62,14 @@ public:
         float cosThetai = Frame::absCosTheta(wi);
         float cosThetao = Frame::absCosTheta(wo);
 
-        Color weight = (R * D * Gwo * abs(wh.dot(wo))) / cosThetao;
+        // Color weight = (R * D * Gwo * abs(wh.dot(wo))) / cosThetao;
         // Color weight = (R * D * Gwi * Gwo) / (4 * cosThetai * cosThetao);
-        weight /= pdfWi;
-        // float fresnel = schlickWeight(Frame::absCosTheta(wh));
-        // Color weight = (R * D * Gwo) * abs(wh.dot(wo));
+        // weight /= pdfWi / jacobian;
+
+        Color weight = (Gwi * m_reflectance->evaluate(uv));
+
+        //  float fresnel = schlickWeight(Frame::absCosTheta(wh));
+        //  Color weight = (R * D * Gwo) * abs(wh.dot(wo));
 
         BsdfSample bsdfSample = BsdfSample();
         bsdfSample.weight     = weight;

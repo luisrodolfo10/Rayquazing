@@ -54,8 +54,8 @@ public:
                         std::max(0.f, its.shadingNormal.dot(directSample.wi));
                     BsdfEval bsdf = its.evaluateBsdf(directSample.wi);
                     if (!bsdf.isInvalid()) {
-                        contribution += directSample.weight * bsdf.value /
-                                        lightSample.probability;
+                        contribution += directSample.weight * bsdf.value *
+                                        cosTheta / lightSample.probability;
                     }
                 }
             }
