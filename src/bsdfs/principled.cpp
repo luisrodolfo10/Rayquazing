@@ -18,6 +18,7 @@ struct DiffuseLobe {
         //     return bsdf.invalid();
         // }
         bsdf.value = color / Pi;
+        bsdf.value *= abs(wi.z());
         return BsdfEval(bsdf);
     }
 
@@ -59,7 +60,7 @@ struct MetallicLobe {
         // float cosThetai = std::max(0.0f, Frame::cosTheta(wi));
         // float cosThetao = std::max(0.0f, Frame::cosTheta(wo));
 
-        Color Fr      = (R * D * Gwi * Gwo) / (4 * cosThetai * cosThetao);
+        Color Fr      = (R * D * Gwi * Gwo) / (4 * cosThetao);
         BsdfEval bsdf = BsdfEval();
         bsdf.value    = Fr;
         return BsdfEval(bsdf);

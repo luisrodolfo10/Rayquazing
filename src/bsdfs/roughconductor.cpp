@@ -40,7 +40,8 @@ public:
         // float cosThetai = std::max(0.0f, Frame::cosTheta(wi));
         // float cosThetao = std::max(0.0f, Frame::cosTheta(wo));
 
-        Color Fr      = (R * D * Gwi * Gwo) / (4 * cosThetai * cosThetao);
+        // cosththetai get cancelled due to multiplication
+        Color Fr      = (R * D * Gwi * Gwo) / (4 * cosThetao);
         BsdfEval bsdf = BsdfEval();
         bsdf.value    = Fr;
         return BsdfEval(bsdf);
