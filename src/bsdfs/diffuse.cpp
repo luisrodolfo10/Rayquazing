@@ -13,7 +13,7 @@ public:
     BsdfEval evaluate(const Point2 &uv, const Vector &wo,
                       const Vector &wi) const override {
         Color color =
-            Color(m_albedo->evaluate(uv) / Pi); // * std::max(0.0f, wi.z());
+            Color(m_albedo->evaluate(uv) / Pi); //* std::max(0.0f, wi.z());
         // Color color   = Color(m_albedo->evaluate(uv));
         BsdfEval bsdf = BsdfEval();
         // if (!Frame::sameHemisphere(wo, wi)) {
