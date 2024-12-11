@@ -15,25 +15,26 @@ public:
     }
     Color Li(const Ray &ray, Sampler &rng) override {
         // Determine if the ray intersects any surfaces in the scene.
-        Color integrator(1.0f);
+        Color throughput(1.0f);
         Ray currentRay = ray;
         int depth      = 0;
-        Color contribution;
+        Color contribution(0.0f);
         while (depth < m_maxdepth) {
             Intersection its = m_scene->intersect(currentRay, rng);
             if (its) {
                 Color emission = its.evaluateEmission().value;
                 if (!m_scene->hasLights()) {
-                    contribution += integrator * emission;
+                    contribution += throughput * emission;
                 }
                 LightSample lightSample = m_scene->sampleLight(rng);
                 if (lightSample.probability > 0) {
                     DirectLightSample directSample =
                         lightSample.light->sampleDirect(its.position, rng);
 
-                    // Trace a secondary ray in the direction of the light.
+                    // Trace a secondary ray in the direction of the light.q
                     Ray secondaryRay;
-                    secondaryRay.origin    = its.position;
+                    secondaryRay.origin =
+                        its.position + its.geometryNormal * Epsilon;
                     secondaryRay.direction = directSample.wi;
                     Intersection secondaryIts =
                         m_scene->intersect(secondaryRay, rng);
@@ -41,42 +42,28 @@ public:
                         secondaryIts.t > directSample.distance) {
                         BsdfEval bsdf = its.evaluateBsdf(directSample.wi);
                         if (!bsdf.isInvalid()) {
-                            contribution += integrator * directSample.weight *
+                            contribution += throughput * directSample.weight *
                                             bsdf.value /
                                             lightSample.probability;
                         }
                     }
                 }
 
-                depth++;
-                if (depth == m_maxdepth) {
-                    break;
-                }
-
                 BsdfSample bsdfSample = its.sampleBsdf(rng);
                 if (!bsdfSample.isInvalid()) {
-                    Ray bsdfRay;
-                    bsdfRay.origin    = its.position;
-                    bsdfRay.direction = bsdfSample.wi;
-                    Intersection secondaryIts =
-                        m_scene->intersect(bsdfRay, rng);
-
-                    Color emissiveContribution =
-                        secondaryIts.evaluateEmission().value;
-                    contribution +=
-                        integrator * bsdfSample.weight * emissiveContribution;
-                    currentRay = Ray(its.position, bsdfSample.wi);
+                    currentRay =
+                        Ray(its.position + its.geometryNormal * Epsilon,
+                            bsdfSample.wi);
                 } else {
+                    // contribution += throughput *
+                    // its.evaluateEmission().value;
                     break;
                 }
-                float cosTheta =
-                    std::max(0.f, its.shadingNormal.dot(bsdfSample.wi));
-                integrator *= bsdfSample.weight * cosTheta;
-                // integrator /= 0.9f;
+                throughput *= bsdfSample.weight;
                 depth++;
 
             } else {
-                contribution += integrator * its.evaluateEmission().value;
+                contribution += throughput * its.evaluateEmission().value;
                 break;
             }
         }
