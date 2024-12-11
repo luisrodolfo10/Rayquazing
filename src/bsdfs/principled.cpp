@@ -52,13 +52,11 @@ struct MetallicLobe {
         float Gwi = microfacet::smithG1(alpha, wh, wi);
         float Gwo = microfacet::smithG1(alpha, wh, wo);
 
-        float cosThetai = Frame::absCosTheta(wi);
+        // float cosThetai = Frame::absCosTheta(wi);
         float cosThetao = Frame::absCosTheta(wo);
-        if (cosThetai == 0 || cosThetao == 0) {
+        if (cosThetao == 0) {
             return BsdfEval(); // Invalid
         }
-        // float cosThetai = std::max(0.0f, Frame::cosTheta(wi));
-        // float cosThetao = std::max(0.0f, Frame::cosTheta(wo));
 
         Color Fr      = (R * D * Gwi * Gwo) / (4 * cosThetao);
         BsdfEval bsdf = BsdfEval();
