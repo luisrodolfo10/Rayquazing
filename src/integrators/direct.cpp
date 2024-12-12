@@ -31,11 +31,6 @@ public:
                 DirectLightSample directSample =
                     lightSample.light->sampleDirect(its.position, rng);
 
-                // Vector flippedNormal = its.shadingNormal;
-                // if (its.shadingNormal.dot(directSample.wi) < 0) {
-                //     flippedNormal = -its.shadingNormal;
-                // }
-
                 // Trace a secondary ray in the direction of the light.
                 Ray secondaryRay;
                 secondaryRay.origin    = its.position;
