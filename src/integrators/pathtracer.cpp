@@ -21,51 +21,39 @@ public:
         Color contribution(0.0f);
         while (depth < m_maxdepth) {
             Intersection its = m_scene->intersect(currentRay, rng);
-            if (its) {
-                Color emission = its.evaluateEmission().value;
-                if (!m_scene->hasLights()) {
-                    contribution += throughput * emission;
-                }
-                LightSample lightSample = m_scene->sampleLight(rng);
-                if (lightSample.probability > 0) {
-                    DirectLightSample directSample =
-                        lightSample.light->sampleDirect(its.position, rng);
-
-                    // Trace a secondary ray in the direction of the light.q
-                    Ray secondaryRay;
-                    secondaryRay.origin =
-                        its.position + its.geometryNormal * Epsilon;
-                    secondaryRay.direction = directSample.wi;
-                    Intersection secondaryIts =
-                        m_scene->intersect(secondaryRay, rng);
-                    if (!secondaryIts ||
-                        secondaryIts.t > directSample.distance) {
-                        BsdfEval bsdf = its.evaluateBsdf(directSample.wi);
-                        if (!bsdf.isInvalid()) {
-                            contribution += throughput * directSample.weight *
-                                            bsdf.value /
-                                            lightSample.probability;
-                        }
-                    }
-                }
-
-                BsdfSample bsdfSample = its.sampleBsdf(rng);
-                if (!bsdfSample.isInvalid()) {
-                    currentRay =
-                        Ray(its.position + its.geometryNormal * Epsilon,
-                            bsdfSample.wi);
-                } else {
-                    // contribution += throughput *
-                    // its.evaluateEmission().value;
-                    break;
-                }
-                throughput *= bsdfSample.weight;
-                depth++;
-
-            } else {
-                contribution += throughput * its.evaluateEmission().value;
+            contribution += throughput * its.evaluateEmission().value;
+            if (!its || depth >= m_maxdepth - 1) {
                 break;
             }
+            LightSample lightSample = m_scene->sampleLight(rng);
+            if (lightSample.probability > 0) {
+                DirectLightSample directSample =
+                    lightSample.light->sampleDirect(its.position, rng);
+
+                // Trace a secondary ray in the direction of the light
+                Ray secondaryRay;
+                // secondaryRay.origin =
+                //     its.position + its.shadingNormal * Epsilon;
+                secondaryRay.origin    = its.position;
+                secondaryRay.direction = directSample.wi;
+                Intersection secondaryIts =
+                    m_scene->intersect(secondaryRay, rng);
+                if (!secondaryIts || secondaryIts.t > directSample.distance) {
+                    BsdfEval bsdf = its.evaluateBsdf(directSample.wi);
+                    if (!bsdf.isInvalid()) {
+                        contribution += throughput * directSample.weight *
+                                        bsdf.value / lightSample.probability;
+                    }
+                }
+            }
+
+            BsdfSample bsdfSample = its.sampleBsdf(rng);
+            if (bsdfSample.isInvalid()) {
+                break;
+            }
+            currentRay = Ray(its.position, bsdfSample.wi.normalized());
+            throughput *= bsdfSample.weight;
+            depth++;
         }
         return contribution;
     }

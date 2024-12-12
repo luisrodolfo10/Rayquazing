@@ -32,10 +32,13 @@ public:
 
     bool intersect(const Ray &ray, Intersection &its,
                    Sampler &rng) const override {
-        Vector oc          = Vector(ray.origin);
-        float a            = 1;
-        float b            = 2.0f * oc.dot(ray.direction);
-        float c            = oc.dot(oc) - radius * radius;
+        // Ofsett ray origin to avoid numerical issues and self intersections
+        Ray rayShifted = Ray(ray.origin + ray.direction.normalized() * Epsilon,
+                             ray.direction.normalized());
+        Vector oc      = Vector(rayShifted.origin);
+        float a        = 1;
+        float b        = 2.0f * oc.dot(rayShifted.direction);
+        float c        = oc.dot(oc) - radius * radius;
         float discriminant = b * b - 4 * a * c;
 
         if (discriminant < 0) {
@@ -50,7 +53,7 @@ public:
             // Checking previous t -> using the closest
             if (t > Epsilon && t < its.t) {
                 its.t                = t;
-                const Point position = ray(t);
+                const Point position = rayShifted(t);
                 populate(its, position); // Fill in the intersection details
                 return true;
             }

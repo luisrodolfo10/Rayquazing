@@ -13,12 +13,12 @@ public:
     BsdfEval evaluate(const Point2 &uv, const Vector &wo,
                       const Vector &wi) const override {
         Color color = Color(m_albedo->evaluate(uv) / Pi); //* abs(wi.z());
-        color *= abs(wi.z());
+        color *= abs(wi.normalized().z());
         // Color color   = Color(m_albedo->evaluate(uv));
         BsdfEval bsdf = BsdfEval();
-        // if (!Frame::sameHemisphere(wo, wi)) {
-        //     return bsdf.invalid();
-        // }
+        if (!Frame::sameHemisphere(wo, wi)) {
+            return bsdf.invalid();
+        }
         bsdf.value = color;
         return BsdfEval(bsdf);
     }
@@ -36,12 +36,13 @@ public:
         // Scale by the inverse of the probability of having sampled that ray
         // float pdf = cosineHemispherePdf(wi);
 
-        // if (!Frame::sameHemisphere(wo, wi)) {
-        //     // wi[2] = -wi.z(); // Flip the direction
-        //     wi = -wi;
-        // }
+        if (!Frame::sameHemisphere(wo, wi)) {
+            // wi[2] = -wi.z(); // Flip the direction
+            wi = -wi;
+        }
+
         // Vector n = Vector(0, 0, 1);
-        // if (!Frame::sameHemisphere(wo, wi)) {
+        // if (Frame::sameHemisphere(wo, wi)) {
         //     wi = reflect(wi, n);
         // }
 
