@@ -1,0 +1,31 @@
+<scene id="scene">
+  <camera type="perspective">
+    <integer name="width" value="1920"/>
+    <integer name="height" value="1080"/>
+    <float name="fov" value="90.661"/>
+    <string name="fovAxis" value="x"/>
+    <transform>
+      <matrix value="0.63203,0.40606,-0.66004,0.31453,  0.77494,-0.33117,0.53832,-0.23313,  7.4342e-07,-0.85173,-0.52399,0.23016,  0,0,0,1"/>
+    </transform>
+  </camera>
+  <instance>
+    <bsdf type="principled">
+      <texture name="baseColor" type="image" filename="textures/brass_pan_01_diff_4k.jpg"/>
+      <texture name="roughness" type="image" filename="textures/brass_pan_01_rough.png.exr" linear="true"/>
+      <texture name="metallic" type="image" filename="textures/brass_pan_01_metal.png.exr" linear="true"/>
+      <texture name="specular" type="constant" value="0"/>
+    </bsdf>
+    <texture name="normal" type="image" filename="textures/brass_pan_01_nor_gl.png.exr" linear="true"/>
+    <shape type="mesh" filename="meshes/subtool1.001.ply"/>
+    <transform>
+      <matrix value="1,0,0,0,  0,1,0,0,  0,0,1,0,  0,0,0,1"/>
+    </transform>
+  </instance>
+  <light type="point" position="0,0,0" power="10,10,10"/>
+  <light type="point" position="0.20457,-0.13468,0.11308" power="30,30,30"/>
+</scene>
+<integrator type="pathtracer" depth="10">
+  <ref id="scene"/>
+  <image id="noisy"/>
+  <sampler type="independent" count="64"/>
+</integrator>
