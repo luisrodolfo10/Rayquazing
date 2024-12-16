@@ -1,0 +1,126 @@
+<test type="image" id="thinless_mesh_ducks">
+    <integrator type="aovGrid" variable= "normals">
+        <scene>
+            <!-- Thin-lens camera setup -->
+            <camera type="thinlens" id="camera">
+                <integer name="width" value="512"/>
+                <integer name="height" value="512"/>
+                
+                <!-- Field of View and Focal Settings -->
+                <string name="fovAxis" value="x"/>
+                <float name="fov" value="50"/>
+                <float name="focalDistance" value="12"/>
+                <float name="lensRadius" value="0.1"/> 
+
+                <!-- Camera Position and Orientation -->
+                <transform>
+                    <lookat origin="-5.5,-5,1" target="6,0,0.5" up="0,0,-1"/>
+                </transform>
+            </camera>
+
+            <!-- Diagonal Line of rubber_duck_toy_1k Instances -->
+            <instance>
+                <shape type="mesh" filename="../meshes/rubber_duck_toy_1k.ply"/>
+                <transform>
+                    <translate x="0" y="0" z="0"/>
+                    <scale value="6"/>
+                </transform>
+            </instance>
+            <instance>
+                <shape type="mesh" filename="../meshes/rubber_duck_toy_1k.ply"/>
+                <transform>
+                    <translate x="0.5" y="0" z="0"/>
+                    <scale value="6"/>
+                </transform>
+            </instance>
+            <instance>
+                <shape type="mesh" filename="../meshes/rubber_duck_toy_1k.ply"/>
+                <transform>
+                    <translate x="1" y="0" z="0"/>
+                    <scale value="6"/>
+                </transform>
+            </instance>
+            <instance>
+                <shape type="mesh" filename="../meshes/rubber_duck_toy_1k.ply"/>
+                <transform>
+                    <translate x="1.5" y="0" z="0"/>
+                    <scale value="6"/>
+                </transform>
+            </instance>
+            <instance>
+                <shape type="mesh" filename="../meshes/rubber_duck_toy_1k.ply"/>
+                <transform>
+                    <translate x="2" y="0" z="0"/>
+                    <scale value="6"/>
+                </transform>
+            </instance>
+            <instance>
+                <shape type="mesh" filename="../meshes/rubber_duck_toy_1k.ply"/>
+                <transform>
+                    <translate x="2.5" y="0" z="0"/>
+                    <scale value="6"/>
+                </transform>
+            </instance>
+            <instance>
+                <shape type="mesh" filename="../meshes/rubber_duck_toy_1k.ply"/>
+                <transform>
+                    <translate x="3" y="0" z="0"/>
+                    <scale value="6"/>
+                </transform>
+            </instance>
+            <instance>
+                <shape type="mesh" filename="../meshes/rubber_duck_toy_1k.ply"/>
+                <transform>
+                    <translate x="3.5" y="0" z="0"/>
+                    <scale value="6"/>
+                </transform>
+            </instance>
+            <instance>
+                <shape type="mesh" filename="../meshes/rubber_duck_toy_1k.ply"/>
+                <transform>
+                    <translate x="4" y="0" z="0"/>
+                    <scale value="6"/>
+                </transform>
+            </instance>
+            <instance>
+                <shape type="mesh" filename="../meshes/rubber_duck_toy_1k.ply"/>
+                <transform>
+                    <translate x="4.5" y="0" z="0"/>
+                    <scale value="6"/>
+                </transform>
+            </instance>
+            <instance>
+                <shape type="mesh" filename="../meshes/rubber_duck_toy_1k.ply"/>
+                <transform>
+                    <translate x="5" y="0" z="0"/>
+                    <scale value="6"/>
+                </transform>
+            </instance>
+            <instance>
+                <shape type="mesh" filename="../meshes/rubber_duck_toy_1k.ply"/>
+                <transform>
+                    <translate x="5.5" y="0" z="0"/>
+                    <scale value="6"/>
+                </transform>
+            </instance>
+            <instance>
+                <shape type="mesh" filename="../meshes/rubber_duck_toy_1k.ply"/>
+                <transform>
+                    <translate x="6.5" y="0" z="0"/>
+                    <scale value="6"/>
+                </transform>
+            </instance>
+            <instance>
+                <shape type="mesh" filename="../meshes/rubber_duck_toy_1k.ply"/>
+                <transform>
+                    <translate x="7" y="0" z="0"/>
+                    <scale value="6"/>
+                </transform>
+            </instance>            
+            <!-- Add more instances as needed for additional bunnies along the line -->
+        </scene>
+
+        <!-- Sampler for random sampling within aperture -->
+        <sampler type="independent" count="70"/>
+    </integrator>
+</test>
