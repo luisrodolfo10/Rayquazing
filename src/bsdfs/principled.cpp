@@ -9,14 +9,7 @@ struct DiffuseLobe {
     Color color;
 
     BsdfEval evaluate(const Vector &wo, const Vector &wi) const {
-
-        // hints:
-        // * copy your diffuse bsdf evaluate here
-        // * you do not need to query a texture, the albedo is given by color
         BsdfEval bsdf = BsdfEval();
-        // if (!Frame::sameHemisphere(wo, wi)) {
-        //     return bsdf.invalid();
-        // }
         bsdf.value = color / Pi;
         bsdf.value *= abs(wi.z());
         return BsdfEval(bsdf);
@@ -24,9 +17,6 @@ struct DiffuseLobe {
 
     BsdfSample sample(const Vector &wo, Sampler &rng) const {
         Vector wi = squareToCosineHemisphere(rng.next2D());
-        // hints:
-        // * copy your diffuse bsdf evaluate here
-        // * you do not need to query a texture, the albedo is given by color
 
         BsdfSample bsdfSample = BsdfSample();
         bsdfSample.weight     = color;
@@ -41,18 +31,12 @@ struct MetallicLobe {
     Color color;
 
     BsdfEval evaluate(const Vector &wo, const Vector &wi) const {
-        // hints:
-        // * copy your roughconductor bsdf evaluate here
-        // * you do not need to query textures
-        //   * the reflectance is given by `color'
-        //   * the variable `alpha' is already provided for you
         Vector wh = (wi + wo).normalized();
         Color R   = color;
         float D   = microfacet::evaluateGGX(alpha, wh);
         float Gwi = microfacet::smithG1(alpha, wh, wi);
         float Gwo = microfacet::smithG1(alpha, wh, wo);
 
-        // float cosThetai = Frame::absCosTheta(wi);
         float cosThetao = Frame::absCosTheta(wo);
         if (cosThetao == 0) {
             return BsdfEval(); // Invalid
@@ -65,11 +49,7 @@ struct MetallicLobe {
     }
 
     BsdfSample sample(const Vector &wo, Sampler &rng) const {
-        // hints:
-        // * copy your roughconductor bsdf sample here
-        // * you do not need to query textures
-        //   * the reflectance is given by `color'
-        //   * the variable `alpha' is already provided for you
+
         Vector wh =
             microfacet::sampleGGXVNDF(alpha, wo, rng.next2D()).normalized();
         Vector wi = reflect(wo, wh).normalized(); // wi has the jacobian term
@@ -139,16 +119,11 @@ public:
 
         const auto combination = combine(uv, wo);
 
-        // hint: evaluate ⁠ combination.diffuse ⁠ and
-        // ⁠ combination.metallic ⁠ and combine their results
         const BsdfEval diffuseEval  = combination.diffuse.evaluate(wo, wi);
         const BsdfEval metallicEval = combination.metallic.evaluate(wo, wi);
 
-        // float diffuseWeight  = combination.diffuseSelectionProb;
-        // float metallicWeight = 1.0f - diffuseWeight;
         BsdfEval bsdfEval = BsdfEval();
-        // bsdfEval.value       = diffuseEval.value * diffuseWeight +
-        //                  metallicEval.value * metallicWeight;
+
         bsdfEval.value = diffuseEval.value + metallicEval.value;
         return bsdfEval;
     }
@@ -159,9 +134,6 @@ public:
 
         const auto combination = combine(uv, wo);
 
-        // hint: sample either ⁠ combination.diffuse ⁠ (probability
-        // ⁠ combination.diffuseSelectionProb) or
-        // ⁠ combination.metallic ⁠
         if (rng.next() < combination.diffuseSelectionProb) {
             BsdfSample diffuseSample = combination.diffuse.sample(wo, rng);
             diffuseSample.weight /= combination.diffuseSelectionProb;

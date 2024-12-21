@@ -12,9 +12,8 @@ public:
 
     BsdfEval evaluate(const Point2 &uv, const Vector &wo,
                       const Vector &wi) const override {
-        Color color = Color(m_albedo->evaluate(uv) / Pi); //* abs(wi.z());
+        Color color = Color(m_albedo->evaluate(uv) / Pi); 
         color *= abs(wi.normalized().z());
-        // Color color   = Color(m_albedo->evaluate(uv));
         BsdfEval bsdf = BsdfEval();
         if (!Frame::sameHemisphere(wo, wi)) {
             return bsdf.invalid();
@@ -30,23 +29,14 @@ public:
         // Assign the correct weight to the sample: evaluation of the BSDF
         // itself (how much light is reflect) multiplied by the foreshortening
         // term cos 𝜔𝑖
-        // BsdfEval bsdfEval = evaluate(uv, wo, wi);
-        // Compute the cosine term (dot product of wi and surface normal)
-        // float cosTheta = wi.z();
-        // Scale by the inverse of the probability of having sampled that ray
-        // float pdf = cosineHemispherePdf(wi);
 
         if (!Frame::sameHemisphere(wo, wi)) {
-            // wi[2] = -wi.z(); // Flip the direction
-            wi = -wi;
+            wi = -wi; // Flip the direction
         }
 
-        // Vector n = Vector(0, 0, 1);
-        // if (Frame::sameHemisphere(wo, wi)) {
-        //     wi = reflect(wi, n);
-        // }
-
-        Color weight = m_albedo->evaluate(uv); // cosTheta / pdf;
+        Color weight = m_albedo->evaluate(
+            uv); // Would be cosTheta / pdf,  but with simplified equation we
+                 // just have to evaluate the albedo.
 
         BsdfSample bsdfSample = BsdfSample();
         bsdfSample.weight     = weight;

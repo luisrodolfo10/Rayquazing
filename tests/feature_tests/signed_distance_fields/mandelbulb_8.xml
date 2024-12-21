@@ -10,13 +10,11 @@
 
                 <transform>
                     <lookat origin="4,0,-6" target="0,0,0" up="5,5,1"/>
-                    <rotate axis="0,0,1" angle="30"/> 
-                    <rotate axis="1,0,0" angle="60"/>
                 </transform>
             </camera>
 
             <instance>
-                <shape type="MandelBulb"/>
+                <shape type="MandelBulb" n="8"/>
             </instance>
         </scene>
         <sampler type="independent" count="16"/>

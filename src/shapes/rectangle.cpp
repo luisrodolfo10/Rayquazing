@@ -44,8 +44,6 @@ public:
         if (ray.direction.z() == 0)
             return false;
 
-        // ray.origin.z + t * ray.direction.z = 0
-        // <=> t = -ray.origin.z / ray.direction.z
         const float t = -ray.origin.z() / ray.direction.z();
 
         // note that we never report an intersection closer than Epsilon (to

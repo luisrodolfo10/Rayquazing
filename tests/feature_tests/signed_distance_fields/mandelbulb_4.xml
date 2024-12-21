@@ -1,0 +1,22 @@
+<test type="image" id="mandelbulb_4">
+    <integrator type="aov" variable="normals">
+        <scene>
+            <camera type="perspective" id="camera">
+                <integer name="width" value="512"/>
+                <integer name="height" value="512"/>
+
+                <string name="fovAxis" value="x"/>
+                <float name="fov" value="27"/>
+
+                <transform>
+                    <lookat origin="4,0,-6" target="0,0,0" up="5,5,1"/>
+                </transform>
+            </camera>
+
+            <instance>
+                <shape type="MandelBulb" n="4"/>
+            </instance>
+        </scene>
+        <sampler type="independent" count="16"/>
+    </integrator>
+</test>

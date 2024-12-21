@@ -70,8 +70,7 @@ for filename in args.filenames:
 ###############################################################################
 ###############################################################################
 ###############################################################################
-    #path = os.path.join(root_path, "tests", filename)
-    path = os.path.join(root_path, "tests", "feature_1_A")   ## Put Folder of tests
+    path = os.path.join(root_path, "tests", "feature_tests")   ## Put Folder of tests
     print(path)
     if os.path.isfile(path):
         tests += [path]
@@ -84,7 +83,7 @@ for filename in args.filenames:
 ################################################################################
 ################################################################################
 ################################################################################        
-#tests = [tests[-1]] #Modify the test # here
+#tests = [tests[-1]] #Modify the test 
 tests = [test for test in tests if re.match(r".*\.xml$", test, re.IGNORECASE)]
 print(tests)
 tests = list(set(tests))

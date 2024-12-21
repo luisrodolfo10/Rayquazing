@@ -1,4 +1,4 @@
-<test type="image" id="sinusoidal">
+<test type="image" id="sinusoidal_0.00001">
     <integrator type="pathtracer" depth="5">
         <scene id="scene">
             <camera type="perspective" id="camera">
@@ -101,6 +101,6 @@
                 </transform>
             </instance>
         </scene>
-        <sampler type="sinusoidal" count="64"/>
+        <sampler type="sinusoidal" count="64" frequency="0.00001" amplitude = "0.00001"/>
     </integrator>
 </test>

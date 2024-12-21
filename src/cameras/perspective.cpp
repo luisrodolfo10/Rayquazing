@@ -15,12 +15,6 @@ namespace lightwave {
 class Perspective : public Camera {
 public:
     Perspective(const Properties &properties) : Camera(properties) {
-        // NOT_IMPLEMENTED
-
-        // hints:
-        // * precompute any expensive operations here (most importantly
-        // trigonometric functions)
-        // * use m_resolution to find the aspect ratio of the image
         float fov           = properties.get<float>("fov");
         std::string fovAxis = properties.get<std::string>("fovAxis");
 
@@ -41,11 +35,6 @@ public:
     }
 
     CameraSample sample(const Point2 &normalized, Sampler &rng) const override {
-        // NOT_IMPLEMENTED
-
-        // hints:
-        // * use m_transform to transform the local camera coordinate system
-        // into the world coordinate system
 
         float px = normalized.x() * mult_x;
         float py = normalized.y() * mult_y;

@@ -6,23 +6,22 @@
 namespace lightwave {
 
 /**
- * @brief Generates random numbers uniformely distributed in [0,1), which are
- * all stochastically independent from another. This is the simplest form of
- * random number generation, and will be sufficient for our introduction to
- * Computer Graphics. If you want to reduce the noise in your renders, a simple
- * way is to implement more sophisticated random numbers (e.g., jittered
- * sampling or blue noise sampling).
- * @see Internally, this sampler uses the PCG32 library to generate random
- * numbers.
+ * @brief A sinusoidal-based number sampler.
+ * Generates random samples using a sinusoidal function. Frequency and amplitud
+ * are configurable.
  */
 class Sinusoidal : public Sampler {
     uint64_t m_seed;
     pcg32 m_pcg;
+    float frequency;
+    float amplitude;
 
 public:
     Sinusoidal(const Properties &properties) : Sampler(properties) {
         m_seed =
             properties.get<int>("seed", std::getenv("reference") ? 1337 : 420);
+        frequency = properties.get<float>("frequency", 0.00003f);
+        amplitude = properties.get<float>("amplitude", 0.5f);
     }
 
     void seed(int sampleIndex) override { m_pcg.seed(m_seed, sampleIndex); }
@@ -34,7 +33,7 @@ public:
     }
 
     float sinusoidal(int sampleIndex) {
-        return 0.5 + 0.5 * std::sin(sampleIndex * 0.000003f);
+        return 0.5 + amplitude * std::sin(sampleIndex * frequency);
     }
 
     float next() override {
