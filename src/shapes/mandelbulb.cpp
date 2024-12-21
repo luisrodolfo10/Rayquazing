@@ -25,12 +25,12 @@ public:
 
     bool intersect(const Ray &ray, Intersection &its,
                    Sampler &rng) const override {
-        const int MAX_STEPS  = 300;
+        const int MAX_STEPS  = 300000;
         const float MAX_DIST = 20.0f;
-        const float Epsilon  = 0.0001f;
+        const float Epsilon  = 0.000001f;
 
         Point currentPos    = ray.origin;
-        float totalDistance = 0.1f;
+        float totalDistance = 0;
         float dist          = std::numeric_limits<float>::max();
         for (int i = 0; i < MAX_STEPS && totalDistance < MAX_DIST; ++i) {
             dist = getMandelbulbDistance(currentPos);
@@ -40,11 +40,18 @@ public:
                 break;
             }
         }
-        if (dist < Epsilon) {
+        if (dist < Epsilon && totalDistance > Epsilon) {
             its.position       = currentPos;
             its.t              = totalDistance;
-            its.geometryNormal = Vector(currentPos);
-            its.shadingNormal  = Vector(currentPos);
+            its.geometryNormal = Vector(currentPos).normalized();
+            its.shadingNormal  = Vector(currentPos).normalized();
+
+            Vector up = { 0, 1, 0 };
+            if (abs(its.geometryNormal[1]) > 0.99f) {
+                up = { 1, 0, 0 }; // Use a horizontal vector if the normal is
+                                  // close
+            }
+            its.tangent = its.geometryNormal.cross(up).normalized();
             return true;
         }
         return false;
@@ -55,7 +62,7 @@ public:
         float dr                = 1.0;
         float r                 = 0.0;
         const float bailout     = 2.0f;
-        const int maxIterations = 16;
+        const int maxIterations = 4;
 
         for (int i = 0; i < maxIterations; i++) {
             r = getRadius(z[0], z[1], z[2]);
