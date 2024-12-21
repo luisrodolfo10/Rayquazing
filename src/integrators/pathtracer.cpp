@@ -3,14 +3,11 @@
 namespace lightwave {
 
 class PathTracerIntegrator : public SamplingIntegrator {
-    // bool m_remap;
     int m_maxdepth;
 
 public:
     PathTracerIntegrator(const Properties &properties)
         : SamplingIntegrator(properties) {
-        // NOT NECESSARY (m_remap)
-        // m_remap = properties.get<bool>("remap", true);
         m_maxdepth = properties.get<int>("depth", 2);
     }
     Color Li(const Ray &ray, Sampler &rng) override {
@@ -32,8 +29,6 @@ public:
 
                 // Trace a secondary ray in the direction of the light
                 Ray secondaryRay;
-                // secondaryRay.origin =
-                //     its.position + its.shadingNormal * Epsilon;
                 secondaryRay.origin    = its.position;
                 secondaryRay.direction = directSample.wi;
                 Intersection secondaryIts =
@@ -60,11 +55,9 @@ public:
     std::string toString() const override {
         return tfm::format(
             "DirectIntegrator[\n"
-            // "  remap = %s,\n"
             "  sampler = %s,\n"
             "  image = %s,\n"
             "]",
-            // m_remap,
             indent(m_sampler),
             indent(m_image));
     }

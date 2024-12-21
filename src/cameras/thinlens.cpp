@@ -60,10 +60,7 @@ public:
         ray.origin    = origin;
         ray.direction = (pFocus - origin).normalized();
         ray           = m_transform->apply(ray);
-        // ray.origin = Point(ray.origin.x() + pLens.x(),
-        //                    ray.origin.y() + pLens.y(),
-        //                    ray.origin.z());
-        // ray.direction = m_transform->apply(ray.direction).normalized();
+
         ray = ray.normalized();
 
         return CameraSample{ .ray = ray, .weight = Color(1.0f) };
@@ -89,7 +86,6 @@ public:
 
     Point2 SampleDisk(Sampler &rng) const {
         float r = sqrt(rng.next());
-        // float r     = rng.next();
         float theta = 2 * Pi * rng.next();
         return Point2(r * cos(theta), r * sin(theta));
     }

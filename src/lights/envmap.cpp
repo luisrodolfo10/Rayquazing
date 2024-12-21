@@ -17,15 +17,6 @@ public:
     }
 
     EmissionEval evaluate(const Vector &direction) const override {
-
-        // hints:
-        // * if (m_transform) { transform direction vector from world to local
-        // coordinates }
-        // * find the corresponding pixel coordinate for the given local
-        // direction
-        // * make use of std::atan2 instead of tangent function.
-        // * check out the safe versions of sine and cosine, e.g. safe_acos
-        // in math.hpp to avoid problematic edge cases
         Vector localDirection;
         if (m_transform) {
             localDirection = m_transform->inverse(direction).normalized();
@@ -37,10 +28,6 @@ public:
         float theta = safe_acos(localDirection.y());
         float u     = (phi + Pi) * Inv2Pi;
         float v     = theta * InvPi;
-        // float v = localDirection.y() * 0.5 + 0.5;
-
-        // float u = std::clamp((phi + Pi) / (2 * Pi), 0.0f, 1.0f);
-        // float v = std::clamp(theta / Pi, 0.0f, 1.0f);
 
         Point2 warped = Point2(u, v);
         return {

@@ -24,11 +24,6 @@ class ImageTexture : public Texture {
     }
 
     int repeat(int value, int hw) const {
-        // int mod = value % hw;
-        // if (mod < 0) {
-        //     return (hw + mod) % hw;
-        // }
-        // return mod;
         return ((value % hw) + hw) %
                hw; // Works with both positive and negative mod
     }
@@ -113,7 +108,6 @@ public:
             return (c0 * (1 - ty) + c1 * ty) * m_exposure;
         } else {
             return Color(1.f, 0.f, 0.f);
-            // throw std::runtime_error("Invalid FilterMode value.");
         }
     }
 

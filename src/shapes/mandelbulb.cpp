@@ -13,21 +13,12 @@ public:
         n = properties.get<float>("n", 8);
     }
 
-    float getRadius(float x, float y, float z) const {
-        return sqrt(x * x + y * y + z * z);
-    }
-
-    float getTheta(float x, float y, float z) const {
-        return atan2(sqrt(x * x + y * y), z);
-    }
-
-    float getPhi(float x, float y, float z) const { return atan2(y, z); }
-
     bool intersect(const Ray &ray, Intersection &its,
                    Sampler &rng) const override {
-        const int MAX_STEPS  = 300000;
-        const float MAX_DIST = 20.0f;
-        const float Epsilon  = 0.000001f;
+        const int MAX_STEPS = 300000; // Number of steps for the SDF
+        const float MAX_DIST =
+            20.0f; // Maximum distance to consider an intersection
+        const float Epsilon = 0.000001f;
 
         Point currentPos    = ray.origin;
         float totalDistance = 0;
@@ -57,32 +48,39 @@ public:
         return false;
     }
 
+    // Code modified from:
+    // http://blog.hvidtfeldts.net/index.php/2011/09/distance-estimated-3d-fractals-v-the-mandelbulb-different-de-approximations/
     float getMandelbulbDistance(const Point &p) const {
-        Vector z                = Vector(p);
-        float dr                = 1.0;
-        float r                 = 0.0;
-        const float bailout     = 2.0f;
-        const int maxIterations = 4;
+        Vector z = Vector(p);
+        float dr = 1.0;
+        float r  = 0.0;
+        const float bailout =
+            2.0f; // Threshold after which the point goes to infinity
+        const int maxIterations = 20; // Times the fractal pattern will repeat
 
         for (int i = 0; i < maxIterations; i++) {
-            r = getRadius(z[0], z[1], z[2]);
+            r = z.length();
             if (r > bailout)
                 break;
 
             // Spherical coordinates
-            float theta = getTheta(z[0], z[1], z[2]);
-            float phi   = getPhi(z[0], z[1], z[2]);
-
-            // Update z
-            float zr = std::pow(r, n);
-            z = Vector(zr * std::sin(theta * n) * std::cos(phi * n) + p[0],
-                       zr * std::sin(theta * n) * std::sin(phi * n) + p[1],
-                       zr * std::cos(theta * n) + p[2]);
-
+            float theta = acos(z[0] / r);
+            float phi   = atan2(z[1], z[0]);
             // Update the distance
-            dr = std::pow(r, n - 1) * n * dr + 1.0;
+            dr = pow(r, n - 1) * n * dr + 1.0;
+
+            // Scale and rotate the point
+            float zr = pow(r, n);
+            theta    = theta * n;
+            phi      = phi * n;
+
+            // Put in cartesian coordinates
+            z = zr * Vector(sin(theta) * cos(phi),
+                            sin(phi) * sin(theta),
+                            cos(theta));
+            z += Vector(p);
         }
-        return 0.5f * std::log(r) * r / dr;
+        return 0.5f * log(r) * r / dr;
     }
 
     Bounds getBoundingBox() const override {

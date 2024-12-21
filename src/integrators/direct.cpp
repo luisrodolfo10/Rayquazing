@@ -8,8 +8,6 @@ class DirectIntegrator : public SamplingIntegrator {
 public:
     DirectIntegrator(const Properties &properties)
         : SamplingIntegrator(properties) {
-        // NOT NECESSARY (m_remap)
-        // m_remap = properties.get<bool>("remap", true);
     }
     Color Li(const Ray &ray, Sampler &rng) override {
         // Determine if the ray intersects any surfaces in the scene.
@@ -41,12 +39,8 @@ public:
                 // And if the light is not occluded add its contribution
                 // weighted by the bsdf value at the first intersection.
                 if (!secondaryIts || secondaryIts.t > directSample.distance) {
-                    // float cosTheta =
-                    //     std::max(0.f, flippedNormal.dot(directSample.wi));
                     BsdfEval bsdf = its.evaluateBsdf(directSample.wi);
                     if (!bsdf.isInvalid()) {
-                        // contribution += directSample.weight * bsdf.value *
-                        //                 cosTheta / lightSample.probability;
                         contribution += directSample.weight * bsdf.value /
                                         lightSample.probability;
                     }
@@ -79,17 +73,14 @@ public:
             // exit the scene. ref<BackgroundLight> m_background;
             // BackgroundLight is a light initialised with a direction
             return its.evaluateEmission().value;
-            // return Color(0, 1, 0);
         }
     }
     std::string toString() const override {
         return tfm::format(
             "DirectIntegrator[\n"
-            // "  remap = %s,\n"
             "  sampler = %s,\n"
             "  image = %s,\n"
             "]",
-            // m_remap,
             indent(m_sampler),
             indent(m_image));
     }

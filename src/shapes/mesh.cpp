@@ -49,9 +49,6 @@ protected:
     bool intersect(int primitiveIndex, const Ray &ray, Intersection &its,
                    Sampler &rng) const override {
 
-        // hints:
-        // * use m_triangles[primitiveIndex] to get the vertex indices of the
-        // triangle that should be intersected
         Vector3i triangleIndices = m_triangles[primitiveIndex];
         Vertex v1                = m_vertices[triangleIndices[0]];
         Vertex v2                = m_vertices[triangleIndices[1]];
