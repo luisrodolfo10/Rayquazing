@@ -108,7 +108,7 @@
     </integrator>
 </test> -->
 
-<test type="image" id="multi_light_point">
+<test type="image" id="multi_light_point_try">
     <integrator type="direct">
         <scene id="scene">
             <camera type="perspective" id="camera">
@@ -183,7 +183,7 @@
             </instance>
 
             <instance>
-                <shape type="sphere"/>
+                <shape type="MandelBulb"/>
                 <bsdf type="diffuse">
                     <texture name="albedo" type="constant" value="0.9"/>
                 </bsdf>

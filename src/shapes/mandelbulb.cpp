@@ -13,14 +13,26 @@ public:
         n = properties.get<float>("n", 8);
     }
 
+    // https://iquilezles.org/articles/normalsSDF/
     Vector computeNormal(const Point &p) const {
-        const float h = 1e-4f; // Small step
-        return Vector(getMandelbulbDistance(Point(p[0] + h, p[1], p[2])) -
-                          getMandelbulbDistance(Point(p[0] - h, p[1], p[2])),
-                      getMandelbulbDistance(Point(p[0], p[1] + h, p[2])) -
-                          getMandelbulbDistance(Point(p[0], p[1] - h, p[2])),
-                      getMandelbulbDistance(Point(p[0], p[1], p[2] + h)) -
-                          getMandelbulbDistance(Point(p[0], p[1], p[2] - h)));
+        std::cout << "Computing normal at Point: (" << p[0] << ", " << p[1]
+                  << ", " << p[2] << ")" << std::endl;
+        const float h = 0.00001f; // Small step
+        return Vector(            // central differences
+            (getMandelbulbDistance(Point(p[0] + h, p[1], p[2])) -
+             getMandelbulbDistance(Point(p[0] - h, p[1], p[2]))) /
+                2,
+            (getMandelbulbDistance(Point(p[0], p[1] + h, p[2])) -
+             getMandelbulbDistance(Point(p[0], p[1] - h, p[2]))) /
+                2,
+            (getMandelbulbDistance(Point(p[0], p[1], p[2] + h)) -
+             getMandelbulbDistance(Point(p[0], p[1], p[2] - h))) /
+                2);
+
+        // Vector( // forward differences (more efficient)
+        //     getMandelbulbDistance(Point(p[0] + h, p[1], p[2])),
+        //     getMandelbulbDistance(Point(p[0], p[1] + h, p[2])),
+        //     getMandelbulbDistance(Point(p[0], p[1], p[2] + h)));
     }
 
     bool intersect(const Ray &ray, Intersection &its,
@@ -42,14 +54,10 @@ public:
             }
         }
         if (dist < Epsilon && totalDistance > Epsilon) {
-            its.position = currentPos;
-            its.t        = totalDistance;
-            its.geometryNormal =
-                Vector(currentPos)
-                    .normalized(); // computeNormal(currentPos).normalized();
-            its.shadingNormal =
-                Vector(currentPos)
-                    .normalized(); // computeNormal(currentPos).normalized();
+            its.position       = currentPos;
+            its.t              = totalDistance;
+            its.geometryNormal = computeNormal(currentPos).normalized();
+            its.shadingNormal  = its.geometryNormal;
 
             Vector up = { 0, 1, 0 };
             if (abs(its.geometryNormal[1]) > 0.99f) {
