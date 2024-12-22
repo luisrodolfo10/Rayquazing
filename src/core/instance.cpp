@@ -20,6 +20,9 @@ void Instance::transformFrame(SurfaceEvent &surf, const Vector &wo) const {
         // Code based from:
         // https://learnopengl.com/Advanced-Lighting/Normal-Mapping
         shadingFrame.normal = m_transform->applyNormal(normal_vec).normalized();
+        // if (shadingFrame.normal.dot(wo) < 0) {
+        //     shadingFrame.normal = -shadingFrame.normal;
+        // }
     } else {
         shadingFrame.normal =
             m_transform->applyNormal(shadingFrame.normal).normalized();

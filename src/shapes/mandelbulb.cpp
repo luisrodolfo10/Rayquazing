@@ -13,12 +13,22 @@ public:
         n = properties.get<float>("n", 8);
     }
 
+    Vector computeNormal(const Point &p) const {
+        const float h = 1e-4f; // Small step
+        return Vector(getMandelbulbDistance(Point(p[0] + h, p[1], p[2])) -
+                          getMandelbulbDistance(Point(p[0] - h, p[1], p[2])),
+                      getMandelbulbDistance(Point(p[0], p[1] + h, p[2])) -
+                          getMandelbulbDistance(Point(p[0], p[1] - h, p[2])),
+                      getMandelbulbDistance(Point(p[0], p[1], p[2] + h)) -
+                          getMandelbulbDistance(Point(p[0], p[1], p[2] - h)));
+    }
+
     bool intersect(const Ray &ray, Intersection &its,
                    Sampler &rng) const override {
         const int MAX_STEPS = 300000; // Number of steps for the SDF
         const float MAX_DIST =
             20.0f; // Maximum distance to consider an intersection
-        const float Epsilon = 0.000001f;
+        // const float Epsilon = 0.000001f;
 
         Point currentPos    = ray.origin;
         float totalDistance = 0;
@@ -32,10 +42,14 @@ public:
             }
         }
         if (dist < Epsilon && totalDistance > Epsilon) {
-            its.position       = currentPos;
-            its.t              = totalDistance;
-            its.geometryNormal = Vector(currentPos).normalized();
-            its.shadingNormal  = Vector(currentPos).normalized();
+            its.position = currentPos;
+            its.t        = totalDistance;
+            its.geometryNormal =
+                Vector(currentPos)
+                    .normalized(); // computeNormal(currentPos).normalized();
+            its.shadingNormal =
+                Vector(currentPos)
+                    .normalized(); // computeNormal(currentPos).normalized();
 
             Vector up = { 0, 1, 0 };
             if (abs(its.geometryNormal[1]) > 0.99f) {
