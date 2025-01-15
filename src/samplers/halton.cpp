@@ -1,109 +1,133 @@
-// #include <lightwave.hpp>
+#include <lightwave.hpp>
 
-// #include "pcg32.h"
-// #include <cmath>
-// #include <functional>
-// #include <random>
+#include "pcg32.h"
+#include <cmath>
+#include <random>
 
-// // Reference:
-// //
-// https://www.pbr-book.org/4ed/Sampling_and_Reconstruction/Halton_Sampler#fragment-HaltonSamplerPublicMethods-0
-// namespace lightwave {
+// Reference:
+// https:
+//
+// www.pbr-book.org/4ed/Sampling_and_Reconstruction/Halton_Sampler#fragment-HaltonSamplerPublicMethods-0
+namespace lightwave {
 
-// /**
-//  * @brief Generates numbers in [0,1) following the Halton sampling
-//  distribution.
-//  * @see Internally, this sampler uses the PCG32 library to generate random
-//  * numbers.
-//  */
-// class Halton : public Sampler {
-//     uint64_t m_seed;
-//     pcg32 m_pcg;
-//     static constexpr int PrimeTableSize = 64;
+/**
+ * @brief Generates numbers following the Halton sampling distribution.
+ */
+class Halton : public Sampler {
+    uint64_t m_seed;
+    pcg32 m_pcg;
+    static constexpr int PrimeTableSize = 10000;
+    std::vector<int> Primes             = GeneratePrimes(PrimeTableSize);
+    // Instead of mixBits in the reference code
+    std::vector<int> Permutations = GeneratePermutations(Primes);
+    int64_t haltonIndex           = 0;
+    int dimension                 = 0;
+    int primeSum = std::accumulate(Primes.begin(), Primes.end(), 0);
+    std::vector<int> primeSums;
 
-// private:
-//     float OwenScrambledRadicalInverse(int baseIndex, uint64_t a,
-//                                       uint32_t hash) {
-//         int base      = Primes[baseIndex]; // TODO.
-//         float invBase = (float) 1 / (float) base, invBaseM = 1;
-//         uint64_t reversedDigits = 0;
-//         int digitIndex          = 0;
-//         while (1 - invBaseM < 1) {
-//             uint64_t next  = a / base;
-//             int digitValue = a - next * base;
-//             uint32_t digitHash =
-//                 MixBits(hash ^ reversedDigits); // TODO. IS IT IN CMATH?
-//             digitValue = PermutationElement(
-//                 digitValue, base, digitHash); // TODO. IS IT IN CMATH?
-//             reversedDigits = reversedDigits * base + digitValue;
-//             invBaseM *= invBase;
-//             ++digitIndex;
-//             a = next;
-//         }
-//         return min(invBaseM * reversedDigits, 1 - Epsilon);
-//     }
+private:
+    std::vector<int> GeneratePermutations(const std::vector<int> &Primes) {
+        std::vector<int> Permutations(Primes.size());
+        Permutations.resize(primeSum);
+        int *perm = &Permutations[0];
+        for (size_t i = 0; i < Primes.size(); ++i) {
+            for (int j = 0; j < Primes[i]; ++j)
+                perm[j] = j;
+            perm += Primes[i];
+        }
+        return Permutations;
+    }
 
-//     static uint64_t multiplicativeInverse(int64_t a, int64_t n) {
-//         int64_t x, y;
-//         extendedGCD(a, n, &x, &y);
-//         return x % n;
-//     }
+    std::vector<int> GeneratePrimes(int PrimeTableSize) {
+        // a table of bools will mark whether the number is prime or not
+        std::vector<bool> isPrime(PrimeTableSize + 1, true);
+        isPrime[0] = isPrime[1] = false; // 0 and 1 are not prime numbers.
+        for (int i = 2; i <= std::sqrt(PrimeTableSize); ++i) {
+            if (isPrime[i]) {
+                for (int j = i * i; j <= PrimeTableSize; j += i) {
+                    isPrime[j] = false;
+                }
+            }
+        }
+        // we extract those that have not been marked as "not prime"
+        std::vector<int> Primes;
+        for (int i = 2; i <= PrimeTableSize; ++i) {
+            if (isPrime[i]) {
+                Primes.push_back(i);
+            }
+        }
 
-//     static void extendedGCD(uint64_t a, uint64_t b, int64_t *x, int64_t *y) {
-//         if (b == 0) {
-//             *x = 1;
-//             *y = 0;
-//             return;
-//         }
-//         int64_t d = a / b, xp, yp;
-//         extendedGCD(b, a % b, &xp, &yp);
-//         *x = yp;
-//         *y = xp - (d * yp);
-//     }
+        return Primes;
+    }
 
-//     float SampleDimension(int dim) const {
-//         if (dim >= PrimeTableSize)
-//             dim = 0;
-//         return OwenScrambledRadicalInverse(primes[dim], m_haltonIndex);
-//     }
+    float OwenScrambledRadicalInverse(int baseIndex, int64_t a, int *perm) {
+        int base      = Primes[baseIndex];
+        float invBase = (float) 1 / (float) base, invBaseM = 1;
+        uint64_t reversedDigits = 0;
+        int digitIndex          = 0;
+        while (1 - invBaseM < 1) {
+            uint64_t next  = a / base;
+            int digitValue = a - next * base;
+            digitValue     = perm[digitValue];
+            reversedDigits = reversedDigits * base + digitValue;
+            invBaseM *= invBase;
+            ++digitIndex;
+            a = next;
+        }
+        return min(invBaseM * reversedDigits, 1 - Epsilon);
+    }
 
-// public:
-//     Halton(const Properties &properties) : Sampler(properties) {
-//         m_seed =
-//             properties.get<int>("seed", std::getenv("reference") ? 1337 :
-//             420);
-//     }
+    float SampleDimension(int dimension) {
+        int *perm = &Permutations[primeSums[dimension]];
+        return OwenScrambledRadicalInverse(dimension, haltonIndex, perm);
+    }
 
-//     void seed(int sampleIndex) override {
-//         m_pcg.seed(m_seed, sampleIndex);
-//         m_haltonIndex = 0;
-//     }
+public:
+    Halton(const Properties &properties) : Sampler(properties) {
+        m_seed =
+            properties.get<int>("seed", std::getenv("reference") ? 1337 : 420);
+        std::partial_sum(
+            Primes.begin(), Primes.end(), std::back_inserter(primeSums));
+    }
 
-//     void seed(const Point2i &pixel, int sampleIndex) override {
-//         const uint64_t a =
-//             hash::fnv1a(pixel.x(), pixel.y(), sampleIndex, m_seed);
-//         m_pcg.seed(a);
-//     }
+    void seed(int sampleIndex) override {
+        m_pcg.seed(m_seed, sampleIndex);
+        // m_haltonIndex = 0;
+    }
 
-//     float next() override {
-//         float value = SampleDimension(m_dimension);
-//         m_dimension++;
-//         return value;
-//     }
+    void seed(const Point2i &pixel, int sampleIndex) override {
+        const uint64_t a =
+            hash::fnv1a(pixel.x(), pixel.y(), sampleIndex, m_seed);
+        m_pcg.seed(a);
+    }
 
-//     ref<Sampler> clone() const override {
-//         return std::make_shared<Halton>(*this);
-//     }
+    float next() override {
+        if (dimension >= PrimeTableSize) {
+            dimension = dimension % PrimeTableSize;
+        }
+        return SampleDimension(dimension++);
+    }
 
-//     std::string toString() const override {
-//         return tfm::format(
-//             "Halton[\n"
-//             "  count = %d\n"
-//             "]",
-//             m_samplesPerPixel);
-//     }
-// };
+    Point2 next2D() override {
+        if (dimension + 1 >= PrimeTableSize) {
+            dimension = dimension % PrimeTableSize;
+        }
+        return { SampleDimension(dimension), SampleDimension(dimension + 1) };
+    }
 
-// } // namespace lightwave
+    ref<Sampler> clone() const override {
+        return std::make_shared<Halton>(*this);
+    }
 
-// REGISTER_SAMPLER(Halton, "halton")
+    std::string toString() const override {
+        return tfm::format(
+            "Halton[\n"
+            "  count = %d\n"
+            "]",
+            m_samplesPerPixel);
+    }
+};
+
+} // namespace lightwave
+
+REGISTER_SAMPLER(Halton, "halton")
