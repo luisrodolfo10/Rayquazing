@@ -56,7 +56,7 @@ public:
         m_bsdf      = properties.getOptionalChild<Bsdf>();
         m_emission  = properties.getOptionalChild<Emission>();
         m_transform = properties.getOptionalChild<Transform>();
-        m_normal    = properties.getOptionalChild<Texture>();
+        m_normal    = properties.getOptional<Texture>("normal");
         m_visible   = false;
     }
 
