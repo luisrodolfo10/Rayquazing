@@ -16,24 +16,31 @@ namespace lightwave {
 class Halton : public Sampler {
     uint64_t m_seed;
     pcg32 m_pcg;
-    static constexpr int PrimeTableSize = 10000;
-    std::vector<int> Primes             = GeneratePrimes(PrimeTableSize);
-    // Instead of mixBits in the reference code
-    std::vector<int> Permutations = GeneratePermutations(Primes);
-    int64_t haltonIndex           = 0;
-    int dimension                 = 0;
-    int primeSum = std::accumulate(Primes.begin(), Primes.end(), 0);
+    static constexpr int PrimeTableSize = 500;
+    std::vector<int> Primes;
+    std::vector<int> Permutations;
+    int64_t haltonIndex = 0;
+    int dimension       = 0;
+    int primeSum;
     std::vector<int> primeSums;
 
 private:
-    std::vector<int> GeneratePermutations(const std::vector<int> &Primes) {
-        std::vector<int> Permutations(Primes.size());
-        Permutations.resize(primeSum);
-        int *perm = &Permutations[0];
-        for (size_t i = 0; i < Primes.size(); ++i) {
-            for (int j = 0; j < Primes[i]; ++j)
-                perm[j] = j;
-            perm += Primes[i];
+    std::vector<int> GeneratePermutations(const std::vector<int> &Primes,
+                                          const std::vector<int> &primeSums) {
+        std::mt19937 rng(m_seed);
+        std::vector<int> Permutations;
+        Permutations.resize(primeSums.back());
+
+        for (int i = 0; i < Primes.size(); ++i) {
+            int p      = Primes[i];
+            int offset = primeSums[i];
+            for (int v = 0; v < p; ++v) {
+                Permutations[offset + v] = v;
+            }
+
+            std::shuffle(Permutations.begin() + offset,
+                         Permutations.begin() + offset + p,
+                         rng);
         }
         return Permutations;
     }
@@ -77,42 +84,53 @@ private:
         return min(invBaseM * reversedDigits, 1 - Epsilon);
     }
 
-    float SampleDimension(int dimension) {
+    float SampleDimension(int dimension, int index) {
         int *perm = &Permutations[primeSums[dimension]];
-        return OwenScrambledRadicalInverse(dimension, haltonIndex, perm);
+        return OwenScrambledRadicalInverse(dimension, index, perm);
     }
 
 public:
     Halton(const Properties &properties) : Sampler(properties) {
         m_seed =
             properties.get<int>("seed", std::getenv("reference") ? 1337 : 420);
-        std::partial_sum(
-            Primes.begin(), Primes.end(), std::back_inserter(primeSums));
+        Primes = GeneratePrimes(PrimeTableSize);
+        primeSums.resize(Primes.size() + 1);
+        for (size_t i = 0; i < Primes.size(); ++i)
+            primeSums[i + 1] = primeSums[i] + Primes[i];
+        primeSum     = std::accumulate(Primes.begin(), Primes.end(), 0);
+        Permutations = GeneratePermutations(Primes, primeSums);
     }
 
     void seed(int sampleIndex) override {
         m_pcg.seed(m_seed, sampleIndex);
-        // m_haltonIndex = 0;
+
+        haltonIndex = sampleIndex;
+        dimension   = 0;
     }
 
     void seed(const Point2i &pixel, int sampleIndex) override {
-        const uint64_t a =
+        const uint64_t hashVal =
             hash::fnv1a(pixel.x(), pixel.y(), sampleIndex, m_seed);
-        m_pcg.seed(a);
+        m_pcg.seed(hashVal);
+
+        haltonIndex = sampleIndex;
+        dimension   = 0;
     }
 
     float next() override {
-        if (dimension >= PrimeTableSize) {
-            dimension = dimension % PrimeTableSize;
+        if (dimension >= (int) Primes.size()) {
+            dimension = dimension % (int) Primes.size();
         }
-        return SampleDimension(dimension++);
+        float sample = SampleDimension(dimension, haltonIndex);
+        dimension++;
+        return sample;
     }
 
     Point2 next2D() override {
-        if (dimension + 1 >= PrimeTableSize) {
-            dimension = dimension % PrimeTableSize;
-        }
-        return { SampleDimension(dimension), SampleDimension(dimension + 1) };
+        float x = SampleDimension(0, haltonIndex);
+        float y = SampleDimension(1, haltonIndex);
+        haltonIndex++;
+        return Point2(x, y);
     }
 
     ref<Sampler> clone() const override {
