@@ -5,9 +5,7 @@
 #include <random>
 
 // Reference:
-// https:
-//
-// www.pbr-book.org/4ed/Sampling_and_Reconstruction/Halton_Sampler#fragment-HaltonSamplerPublicMethods-0
+// https://www.pbr-book.org/4ed/Sampling_and_Reconstruction/Halton_Sampler#fragment-HaltonSamplerPublicMethods-0
 namespace lightwave {
 
 /**
@@ -16,6 +14,7 @@ namespace lightwave {
 class Halton : public Sampler {
     uint64_t m_seed;
     pcg32 m_pcg;
+    float m_random;
     static constexpr int PrimeTableSize = 500;
     std::vector<int> Primes;
     std::vector<int> Permutations;
@@ -103,7 +102,7 @@ public:
 
     void seed(int sampleIndex) override {
         m_pcg.seed(m_seed, sampleIndex);
-
+        m_random    = 0;
         haltonIndex = sampleIndex;
         dimension   = 0;
     }
@@ -111,7 +110,9 @@ public:
     void seed(const Point2i &pixel, int sampleIndex) override {
         const uint64_t hashVal =
             hash::fnv1a(pixel.x(), pixel.y(), sampleIndex, m_seed);
-        m_pcg.seed(hashVal);
+        const uint64_t a = (uint64_t(pixel.x()) << 32) ^ pixel.y();
+        m_pcg.seed(1337, a);
+        m_random = m_pcg.nextFloat();
 
         haltonIndex = sampleIndex;
         dimension   = 0;
@@ -123,12 +124,14 @@ public:
         }
         float sample = SampleDimension(dimension, haltonIndex);
         dimension++;
-        return sample;
+        if (sample + m_random > 1.f)
+            sample -= 1.f;
+        return sample + m_random;
     }
 
     Point2 next2D() override {
-        float x = SampleDimension(0, haltonIndex);
-        float y = SampleDimension(1, haltonIndex);
+        float x = next();
+        float y = next();
         haltonIndex++;
         return Point2(x, y);
     }
