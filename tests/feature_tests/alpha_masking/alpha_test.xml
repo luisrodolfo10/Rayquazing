@@ -1,0 +1,78 @@
+<test type="image" id="with_alpha">
+<scene id="scene">
+  <camera type="perspective">
+    <integer name="width" value="1920"/>
+    <integer name="height" value="1080"/>
+    <float name="fov" value="39.598"/>
+    <string name="fovAxis" value="x"/>
+    <transform>
+      <matrix value="1,0,0,0,  0,3.4229e-08,1,-14.115,  0,-1,3.4229e-08,1,  0,0,0,1"/>
+    </transform>
+  </camera>
+  <light type="directional" direction="0.56639,0.21839,0.79467" intensity="10,10,10"/>
+  <instance>
+    <bsdf type="diffuse">
+      <texture name="albedo" type="constant" value="0.8"/>
+    </bsdf>
+    <shape type="mesh" filename="../../meshes/Plane.ply"/>
+    <transform>
+      <matrix value="12.536,0,0,0,  0,12.536,0,0,  0,0,12.536,0,  0,0,0,1"/>
+    </transform>
+  </instance>
+  <instance>
+    <bsdf type="principled">
+      <texture name="baseColor" type="image" filename="../../textures/1diffcona.png"/>
+      <texture name="roughness" type="image" filename="../../textures/roughcolona1.png" linear="true"/>
+      <texture name="metallic" type="constant" value="0"/>
+      <texture name="specular" type="constant" value="0"/>
+    </bsdf>
+    <texture name="normal" type="image" filename="../../textures/normcolona1.png" linear="true"/>
+    <texture name="alpha" type="image" filename="../../textures/1diffcona.png" linear="true"/>
+    <shape type="mesh" filename="../../meshes/_m_2_Цилиндр.037.ply"/>
+    <transform>
+      <matrix value="0.00011564,0.016268,-1.2282e-09,-0.16448,  -0.016268,0.00011564,-8.7307e-12,5.7881,  3.1878e-17,1.2283e-09,0.016269,4.9777,  0,0,0,1"/>
+    </transform>
+  </instance>
+  
+  <instance>
+    <bsdf type="principled">
+      <texture name="baseColor" type="image" filename="../../textures/diffcolona3.png"/>
+      <texture name="roughness" type="image" filename="../../textures/roughcolona3.png" linear="true"/>
+      <texture name="metallic" type="constant" value="0"/>
+      <texture name="specular" type="constant" value="0"/>
+    </bsdf>
+    <texture name="normal" type="image" filename="../../textures/normalcolona3.png" linear="true"/>
+    <texture name="alpha" type="image" filename="../../textures/diffcolona3.png" linear="true"/>
+    <shape type="mesh" filename="../../meshes/_m_4_Цилиндр.037.ply"/>
+    <transform>
+      <matrix value="0.00011564,0.016268,-1.2282e-09,-0.16448,  -0.016268,0.00011564,-8.7307e-12,5.7881,  3.1878e-17,1.2283e-09,0.016269,4.9777,  0,0,0,1"/>
+    </transform>
+  </instance>
+  <instance>
+    <bsdf type="principled">
+      <texture name="baseColor" type="image" filename="../../textures/diffcolona4.png"/>
+      <texture name="roughness" type="image" filename="../../textures/roughcolona4.png" linear="true"/>
+      <texture name="metallic" type="constant" value="0"/>
+      <texture name="specular" type="constant" value="0"/>
+    </bsdf>
+    <texture name="normal" type="image" filename="../../textures/normalcolona4.png" linear="true"/>
+    <texture name="alpha" type="image" filename="../../textures/diffcolona4.png" linear="true"/>
+    <shape type="mesh" filename="../../meshes/_m_5_Цилиндр.037.ply"/>
+    <transform>
+      <matrix value="0.00011564,0.016268,-1.2282e-09,-0.16448,  -0.016268,0.00011564,-8.7307e-12,5.7881,  3.1878e-17,1.2283e-09,0.016269,4.9777,  0,0,0,1"/>
+    </transform>
+  </instance>
+  <light type="envmap">
+    <texture type="constant" value="0.050876,0.050876,0.050876"/>
+    <transform>
+      <matrix value="1,0,0,0,  0,0,1,0,  0,-1,0,0,  0,0,0,1"/>
+    </transform>
+  </light>
+</scene>
+<integrator type="pathtracer" depth="10">
+  <ref id="scene"/>
+  <image id="noisy"/>
+  <sampler type="independent" count="64"/>
+</integrator>
+</test>
+

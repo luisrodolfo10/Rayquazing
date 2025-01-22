@@ -65,21 +65,6 @@ inline void validateIntersection(const Intersection &its) {
 
 bool Instance::intersect(const Ray &worldRay, Intersection &its,
                          Sampler &rng) const {
-
-    // if (m_transform) {
-    //     std::cout << "Transform!\n";
-    //     // Color normal_colour = m_normal->evaluate(surf.uv);
-    // } else {
-    //     std::cout << "No transform!";
-    //     // Color normal_colour = m_normal->evaluate(surf.uv);
-    // }
-    // if (m_normal) {
-    //     std::cout << "Evaluating normal map texture.\n";
-    //     // Color normal_colour = m_normal->evaluate(surf.uv);
-    // } else {
-    //     std::cout << "No normal!";
-    //     // Color normal_colour = m_normal->evaluate(surf.uv);
-    // }
     if (!m_transform && !m_normal) {
         // fast path, if no transform is needed
         const Ray localRay        = worldRay;
@@ -109,6 +94,17 @@ bool Instance::intersect(const Ray &worldRay, Intersection &its,
 
         its.position = m_transform->apply(its.position);
         transformFrame(its, -localRay.direction);
+
+        if (m_alpha) {
+            // Evaluate the alpha channel at the intersection
+            Color alphaColor = m_alpha->evaluate(its.uv);
+
+            if (alphaColor == Color(0)) {
+                // Discard intersection
+                its.t = previousT;
+                return false;
+            }
+        }
 
     } else {
         its.t = previousT;
