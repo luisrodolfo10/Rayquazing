@@ -11,13 +11,16 @@ void Instance::transformFrame(SurfaceEvent &surf, const Vector &wo) const {
     if (m_normal) {
         Color normal_col = m_normal->evaluate(surf.uv);
         // Normal values are in [0, 1] and should be remaped to [-1, 1]
-        Vector normal_vec = Vector(2 * normal_col.r() - 1,
+        Vector normal_vec   = Vector(2 * normal_col.r() -
+                                       1, // 2 * Vector(normal_col) - Vector(1);
                                    2 * normal_col.g() - 1,
                                    2 * normal_col.b() - 1);
-        float flip_tangent =
-            shadingFrame.bitangent.cross(normal_vec).dot(shadingFrame.tangent);
-        if (flip_tangent < 0.0f) {
-            shadingFrame.tangent = -shadingFrame.tangent;
+        bool flip_bitangent = false;
+        if (m_transform && m_transform->determinant() < 0) {
+            flip_bitangent = true;
+        }
+        if (flip_bitangent) {
+            shadingFrame.bitangent = -shadingFrame.bitangent;
         }
         normal_vec = normal_vec.x() * shadingFrame.tangent +
                      normal_vec.y() * shadingFrame.bitangent +
