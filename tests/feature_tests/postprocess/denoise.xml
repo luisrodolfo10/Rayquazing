@@ -67,24 +67,24 @@
 
     <integrator type="pathtracer" depth="4">
         <ref id="scene" />
-        <image id="noisy"/>
+        <image id="input" name="input"/>
         <sampler type="independent" count="64" />
     </integrator>
 
     <integrator type="aov" variable="normals">
         <ref id="scene" />
-        <image id="albedo"/>        
+        <image id="albedo" name="albedo"/>        
         <sampler type="independent" count="64" />
     </integrator>
 
     <integrator type="aov" variable="normals">
         <ref id="scene" /> 
-        <image id="normals"/>       
+        <image id="normals" name="normals"/>       
         <sampler type="independent" count="64" />
     </integrator>
 
     <postprocess type="denoising" id="denoising">
-        <ref name="input" id="noisy" />
+        <ref name="input" id="input" />
         <ref name="albedo" id="albedo" />
         <ref name="normals" id="normals" />
         <image name="output" id="output" />
