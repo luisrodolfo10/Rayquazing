@@ -12,7 +12,7 @@ public:
     Denoising(const Properties &properties) : Postprocess(properties) {
         m_normals = properties.get<Image>("normals");
         m_albedo  = properties.get<Image>("albedo");
-        m_input   = properties.get<Image>("noisy");
+        // m_input   = properties.get<Image>("input");
     }
 
     void execute() override {
