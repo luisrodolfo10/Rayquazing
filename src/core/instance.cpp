@@ -9,29 +9,35 @@ void Instance::transformFrame(SurfaceEvent &surf, const Vector &wo) const {
     Frame shadingFrame = surf.shadingFrame();
 
     if (m_normal) {
+        // Reference:
+        // https://learnopengl.com/Advanced-Lighting/Normal-Mapping
         Color normal_col = m_normal->evaluate(surf.uv);
+
         // Normal values are in [0, 1] and should be remaped to [-1, 1]
-        Vector normal_vec   = Vector(2 * normal_col.r() -
-                                       1, // 2 * Vector(normal_col) - Vector(1);
-                                   2 * normal_col.g() - 1,
-                                   2 * normal_col.b() - 1);
-        bool flip_bitangent = false;
-        if (m_transform && m_transform->determinant() < 0) {
-            flip_bitangent = true;
+        Vector normal_vec =
+            (2 * Vector(normal_col.data()) - Vector(1)).normalized();
+
+        bool flip = false;
+        if (m_transform && (m_transform->determinant() < 0)) {
+            flip = true;
         }
-        if (flip_bitangent) {
+        // Condition is wrong, does nothing
+        if (flip) {
             shadingFrame.bitangent = -shadingFrame.bitangent;
         }
-        normal_vec = normal_vec.x() * shadingFrame.tangent +
-                     normal_vec.y() * shadingFrame.bitangent +
-                     normal_vec.z() * shadingFrame.normal;
-        // Code based from:
-        // https://learnopengl.com/Advanced-Lighting/Normal-Mapping
-        shadingFrame.normal = m_transform->applyNormal(normal_vec).normalized();
-    } else {
+        // Error changes direction, this has to be the bug
+        // shadingFrame.bitangent = -shadingFrame.bitangent;
+        // shadingFrame.normal = -shadingFrame.normal;
+        normal_vec = shadingFrame.toWorld(normal_vec.normalized());
+        //  Equivalent:
+        // normal_vec = normal_vec.x() * shadingFrame.tangent +
+        //              normal_vec.y() * shadingFrame.bitangent +
+        //              normal_vec.z() * shadingFrame.normal;
         shadingFrame.normal =
-            m_transform->applyNormal(shadingFrame.normal).normalized();
+            normal_vec; // m_transform->applyNormal(normal_vec).normalized();
     }
+    shadingFrame.normal =
+        m_transform->applyNormal(shadingFrame.normal).normalized();
     shadingFrame.tangent =
         m_transform->apply(shadingFrame.tangent).normalized();
     surf.tangent        = shadingFrame.tangent;
