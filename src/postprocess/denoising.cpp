@@ -4,6 +4,7 @@
 namespace lightwave {
 // Reference: https://www.openimagedenoise.org/documentation.html
 class Denoising : public Postprocess {
+    // normals and albedo are images in exporter.py
     ref<Image> m_normals;
     ref<Image> m_albedo;
 
@@ -11,7 +12,7 @@ public:
     Denoising(const Properties &properties) : Postprocess(properties) {
         m_normals = properties.get<Image>("normals");
         m_albedo  = properties.get<Image>("albedo");
-        m_input   = properties.get<Image>("input");
+        m_input   = properties.get<Image>("noisy");
     }
 
     void execute() override {
@@ -43,7 +44,7 @@ public:
         filter.setImage(
             "albedo", albedoBuf, oidn::Format::Float3, width, height);
         filter.setImage(
-            "normal", normalBuf, oidn::Format::Float3, width, height);
+            "normals", normalBuf, oidn::Format::Float3, width, height);
         filter.setImage("output",
                         outputBuf,
                         oidn::Format::Float3,
