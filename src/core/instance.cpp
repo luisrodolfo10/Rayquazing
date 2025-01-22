@@ -17,24 +17,9 @@ void Instance::transformFrame(SurfaceEvent &surf, const Vector &wo) const {
         Vector normal_vec =
             (2 * Vector(normal_col.data()) - Vector(1)).normalized();
 
-        bool flip = false;
-        if (m_transform && (m_transform->determinant() < 0)) {
-            flip = true;
-        }
-        // Condition is wrong, does nothing
-        if (flip) {
-            shadingFrame.bitangent = -shadingFrame.bitangent;
-        }
-        // Error changes direction, this has to be the bug
-        // shadingFrame.bitangent = -shadingFrame.bitangent;
-        // shadingFrame.normal = -shadingFrame.normal;
         normal_vec = shadingFrame.toWorld(normal_vec.normalized());
-        //  Equivalent:
-        // normal_vec = normal_vec.x() * shadingFrame.tangent +
-        //              normal_vec.y() * shadingFrame.bitangent +
-        //              normal_vec.z() * shadingFrame.normal;
-        shadingFrame.normal =
-            normal_vec; // m_transform->applyNormal(normal_vec).normalized();
+
+        shadingFrame.normal = normal_vec;
     }
     shadingFrame.normal =
         m_transform->applyNormal(shadingFrame.normal).normalized();

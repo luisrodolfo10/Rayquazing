@@ -15,9 +15,9 @@ public:
         Color color = Color(m_albedo->evaluate(uv) / Pi);
         color *= abs(wi.normalized().z());
         BsdfEval bsdf = BsdfEval();
-        if (!Frame::sameHemisphere(wo, wi)) {
-            return bsdf.invalid();
-        }
+        // if (!Frame::sameHemisphere(wo, wi)) {
+        //     return bsdf.invalid();
+        // }
         if (std::isnan(wi.x()) || std::isnan(wi.y()) || std::isnan(wi.z())) {
             return bsdf.invalid();
         }
@@ -35,9 +35,9 @@ public:
         if (std::isnan(wi.x()) || std::isnan(wi.y()) || std::isnan(wi.z())) {
             return BsdfSample().invalid();
         }
-        if (!Frame::sameHemisphere(wo, wi)) {
-            wi = -wi; // Flip the direction
-        }
+        // if (!Frame::sameHemisphere(wo, wi)) {
+        //     wi = -wi; // Flip the direction
+        // }
 
         Color weight = m_albedo->evaluate(
             uv); // Would be cosTheta / pdf,  but with simplified equation we

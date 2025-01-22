@@ -10,9 +10,9 @@ struct DiffuseLobe {
 
     BsdfEval evaluate(const Vector &wo, const Vector &wi) const {
         BsdfEval bsdf = BsdfEval();
-        if (!Frame::sameHemisphere(wi, wo)) {
-            return BsdfEval().invalid();
-        }
+        // if (!Frame::sameHemisphere(wi, wo)) {
+        //     return BsdfEval().invalid();
+        // }
         bsdf.value = color / Pi;
         bsdf.value *= abs(wi.z());
         return BsdfEval(bsdf);
