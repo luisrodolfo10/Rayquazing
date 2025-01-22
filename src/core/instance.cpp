@@ -1,3 +1,4 @@
+#include "pcg32.h"
 #include <lightwave/core.hpp>
 #include <lightwave/instance.hpp>
 #include <lightwave/registry.hpp>
@@ -82,24 +83,23 @@ bool Instance::intersect(const Ray &worldRay, Intersection &its,
 
     const bool wasIntersected = m_shape->intersect(localRay, its, rng);
     if (wasIntersected) {
-        its.instance = this;
-        validateIntersection(its);
-        its.t = its.t / scale_t;
-
-        its.position = m_transform->apply(its.position);
-        transformFrame(its, -localRay.direction);
-
         if (m_alpha) {
             // Evaluate the alpha channel at the intersection
-            Color alphaColor = m_alpha->evaluate(its.uv);
-
-            if (alphaColor == Color(0)) {
+            float alpha = m_alpha->evaluate(its.uv).r();
+            std::cout << "Alpha value is " << alpha << '\n';
+            if (alpha < rng.next()) {
                 // Discard intersection
                 its.t = previousT;
                 return false;
             }
         }
 
+        its.instance = this;
+        validateIntersection(its);
+        its.t = its.t / scale_t;
+
+        its.position = m_transform->apply(its.position);
+        transformFrame(its, -localRay.direction);
     } else {
         its.t = previousT;
     }

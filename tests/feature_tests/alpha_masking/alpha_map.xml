@@ -66,6 +66,9 @@
                 <texture name="reflectance" type="constant" value="1,0.7,0.3" />
                 <texture name="roughness" type="constant" value="0.5" />
             </bsdf>
+            <!-- <bsdf type="diffuse">
+                <texture name="albedo" type="constant" value="1,0.7,0.3" />
+            </bsdf> -->
             <!-- TODO: is the image data linear? -->
             <texture name="alpha" type="image">
                 <image filename="../../textures/alpha.png" linear="true" />
