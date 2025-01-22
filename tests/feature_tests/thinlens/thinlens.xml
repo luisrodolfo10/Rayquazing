@@ -1,0 +1,81 @@
+<test type="image" id="thinlens">
+    <scene id="scene">
+        <camera type="thinlens" id="camera">
+            <integer name="width" value="600" />
+            <integer name="height" value="400" />
+
+            <string name="fovAxis" value="x" />
+            <float name="fov" value="40" />
+            <!-- The reference uses two parameters - radius and focalDistance for the thinlens
+            camera
+            You can change those to match your naming convention as well. -->
+            <float name="lensRadius" value="0.05" />
+            <float name="focalDistance" value="3" />
+
+
+            <transform>
+                <translate y="0.5" z="-3" x="-0.3" />
+            </transform>
+        </camera>
+
+        <!-- <light type="envmap">
+            <texture type="constant" value="0.15" />
+        </light> -->
+        <light type="directional" direction="-1,-1,-1" intensity="2.5" />
+
+
+        <instance id="floor">
+            <shape type="rectangle" />
+
+            <bsdf type="diffuse" id="wall material">
+                <texture name="albedo" type="constant" value="1.0" />
+            </bsdf>
+
+            <transform>
+                <rotate axis="1,0,0" angle="90" />
+                <scale value="100" />
+                <translate y="1.0" />
+            </transform>
+        </instance>
+
+
+        <instance>
+            <shape type="mesh" filename="../../meshes/bunny.ply" />
+            <bsdf type="diffuse" id="wall material">
+                <texture name="albedo" type="constant" value="0.9,0.5,0.5" />
+            </bsdf>
+            <transform>
+                <scale value="0.5" />
+                <rotate axis="1,0,0" angle="90" />
+                <translate x="-0.55" y="1.03" />
+            </transform>
+        </instance>
+        <instance>
+            <shape type="mesh" filename="../../meshes/bunny.ply" />
+            <bsdf type="diffuse" id="wall material">
+                <texture name="albedo" type="constant" value="0.9,0.5,0.5" />
+            </bsdf>
+            <transform>
+                <scale value="0.5" />
+                <rotate axis="1,0,0" angle="90" />
+                <translate x="0.32" y="1.03" z="3.5" />
+            </transform>
+        </instance>
+        <instance>
+            <shape type="mesh" filename="../../meshes/bunny.ply" />
+            <bsdf type="diffuse" id="wall material">
+                <texture name="albedo" type="constant" value="0.9,0.5,0.5" />
+            </bsdf>
+            <transform>
+                <scale value="0.5" />
+                <rotate axis="1,0,0" angle="90" />
+                <translate x="1.95" y="1.03" z="7" />
+            </transform>
+        </instance>
+    </scene>
+
+    <integrator type="pathtracer" depth="4">
+        <ref id="scene" />
+        <sampler type="independent" count="192`" />
+    </integrator>
+</test>

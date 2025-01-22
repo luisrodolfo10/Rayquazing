@@ -1,0 +1,96 @@
+<test type="image" id="alpha_map">
+    <scene id="scene">
+        <camera type="perspective" id="camera">
+            <integer name="width" value="400" />
+            <integer name="height" value="480" />
+
+            <string name="fovAxis" value="x" />
+            <float name="fov" value="40" />
+
+            <transform>
+                <translate y="0.215" z="-3" />
+            </transform>
+        </camera>
+
+        <!-- <light type="envmap">
+            <texture type="constant" value="0.1" />
+        </light> -->
+        <light type="directional" direction="-1,-1,-1" intensity="2.5" />
+
+        <bsdf type="diffuse" id="wall material">
+            <texture name="albedo" type="image">
+                <image filename="../../../textures/alpha.png" linear="true" />
+            </texture>
+            <texture name="alpha" type="image" id="alpha">
+                <image filename="../../../textures/alpha.png" linear="false" />
+            </texture>
+        </bsdf>
+
+
+        <instance>
+            <shape type="mesh" filename="../meshes/bunny.ply" />
+            <bsdf type="diffuse">
+                <texture name="albedo" type="constant" value="1" />
+            </bsdf>
+            <texture name="alpha" type="image">
+                <image filename="../textures/alpha.png" linear="true" />
+            </texture>
+            <transform>
+                <scale value="0.4" />
+                <rotate axis="1,0,0" angle="90" />
+                <translate x="0.18" y="0.93" />
+            </transform>
+        </instance>
+
+
+        <instance id="floor">
+            <shape type="rectangle" />
+
+            <ref id="wall material" />
+
+            <texture name="alpha" type="image">
+                <image filename="../textures/alpha.png" linear="true" />
+            </texture>
+
+            <transform>
+                <rotate axis="1,0,0" angle="90" />
+                <rotate axis="0,1,0" angle="90" />
+
+                <translate y="1.3" />
+            </transform>
+        </instance>
+
+        <instance>
+            <shape type="sphere" />
+            <bsdf type="roughconductor">
+                <texture name="reflectance" type="constant" value="1,0.7,0.3" />
+                <texture name="roughness" type="constant" value="0.5" />
+            </bsdf>
+            <!-- TODO: is the image data linear? -->
+            <texture name="alpha" type="image">
+                <image filename="../textures/alpha.png" linear="true" />
+            </texture>
+            <transform>
+                <scale value="0.65" />
+                <translate y="0.5" z="-0.1" />
+            </transform>
+        </instance>
+
+        <instance id="wall">
+            <shape type="rectangle" />
+            <ref id="wall material" />
+            <texture name="alpha" type="image" id="alpha">
+                <image filename="../textures/alpha.png" linear="false" />
+            </texture>
+            <transform>
+                <rotate axis="1,0,0" angle="180" />
+                <translate z="1" />
+            </transform>
+        </instance>
+    </scene>
+
+    <integrator type="pathtracer" depth="4">
+        <ref id="scene" />
+        <sampler type="independent" count="192" />
+    </integrator>
+</test>
