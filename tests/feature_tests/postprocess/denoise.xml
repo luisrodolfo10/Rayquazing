@@ -63,15 +63,30 @@
             </transform>
         </instance>
     </scene>
+    <!-- How to integrate the postprocessing is explained in exporter.py (a chunk with "if False") -->
 
     <integrator type="pathtracer" depth="4">
         <ref id="scene" />
-        <sampler type="independent" count="196" />
+        <image id="noisy"/>
+        <sampler type="independent" count="64" />
     </integrator>
 
-    <postprocess type="denoising" id="denoiser">
-        <image filename="./denoise_map_test.exr" name="input" />
-        <image filename="./denoise_map_test.exr" name="normals" />
-        <image filename="./denoise_map_test.exr" name="albedo" />
+    <integrator type="aov" variable="normals">
+        <ref id="scene" />
+        <image id="albedo"/>        
+        <sampler type="independent" count="64" />
+    </integrator>
+
+    <integrator type="aov" variable="normals">
+        <ref id="scene" /> 
+        <image id="normals"/>       
+        <sampler type="independent" count="64" />
+    </integrator>
+
+    <postprocess type="denoising" id="denoising">
+        <ref name="input" id="noisy" />
+        <ref name="albedo" id="albedo" />
+        <ref name="normals" id="normals" />
+        <image name="output" id="output" />
     </postprocess>
 </test>
