@@ -70,13 +70,13 @@
     <sampler type="independent" count="64" />
 </integrator>
 
-<!-- <integrator type="aov" variable="normals">
+<integrator type="normal" variable="normals">
     <ref id="scene" />
     <image id="normal"/>        
     <sampler type="independent" count="64" />
-</integrator> -->
+</integrator>
 
-<integrator type="aov" variable="normals">
+<integrator type="albedo" variable="uv">
     <ref id="scene" /> 
     <image id="albedo"/>       
     <sampler type="independent" count="64" />
@@ -85,7 +85,7 @@
 <postprocess type="denoising" id="denoising">
     <ref name="input" id="input" />
     <ref name="albedo" id="albedo" />
-    <!-- <ref name="normal" id="normal" />  -->
+    <ref name="normal" id="normal" /> 
     <image id="output" />
 </postprocess>
 
