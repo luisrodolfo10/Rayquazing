@@ -8,15 +8,24 @@ namespace lightwave {
 void Instance::transformFrame(SurfaceEvent &surf, const Vector &wo) const {
     Frame shadingFrame = surf.shadingFrame();
 
-    shadingFrame.tangent =
-        m_transform->apply(shadingFrame.tangent).normalized();
+    if (m_normal) {
+        // Reference:
+        // https://learnopengl.com/Advanced-Lighting/Normal-Mapping
+        Color normal_col = m_normal->evaluate(surf.uv);
+
+        // Normal values are in [0, 1] and should be remaped to [-1, 1]
+        Vector normal_vec =
+            (2 * Vector(normal_col.data()) - Vector(1)).normalized();
+
+        normal_vec = shadingFrame.toWorld(normal_vec.normalized());
+
+        shadingFrame.normal = normal_vec;
+    }
     shadingFrame.normal =
         m_transform->applyNormal(shadingFrame.normal).normalized();
-    shadingFrame.bitangent =
-        shadingFrame.normal.cross(shadingFrame.tangent).normalized();
-
-    surf.tangent = shadingFrame.tangent;
-
+    shadingFrame.tangent =
+        m_transform->apply(shadingFrame.tangent).normalized();
+    surf.tangent        = shadingFrame.tangent;
     surf.geometryNormal = shadingFrame.normal;
     surf.shadingNormal  = surf.geometryNormal;
 }
@@ -50,7 +59,7 @@ inline void validateIntersection(const Intersection &its) {
 
 bool Instance::intersect(const Ray &worldRay, Intersection &its,
                          Sampler &rng) const {
-    if (!m_transform) {
+    if (!m_transform && !m_normal) {
         // fast path, if no transform is needed
         const Ray localRay        = worldRay;
         const bool wasIntersected = m_shape->intersect(localRay, its, rng);
@@ -73,13 +82,23 @@ bool Instance::intersect(const Ray &worldRay, Intersection &its,
 
     const bool wasIntersected = m_shape->intersect(localRay, its, rng);
     if (wasIntersected) {
+        if (m_alpha) {
+            // Evaluate the alpha channel at the intersection
+            float alpha = m_alpha->evaluate(its.uv).r();
+            std::cout << "Alpha value is " << alpha << '\n';
+            if (alpha < rng.next()) {
+                // Discard intersection
+                its.t = previousT;
+                return false;
+            }
+        }
+
         its.instance = this;
         validateIntersection(its);
         its.t = its.t / scale_t;
 
         its.position = m_transform->apply(its.position);
         transformFrame(its, -localRay.direction);
-
     } else {
         its.t = previousT;
     }
