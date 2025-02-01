@@ -70,7 +70,26 @@ public:
         return Point(0, 0, 0); // Sphere is centered at the origin
     }
 
-    AreaSample sampleArea(Sampler &rng) const override{ NOT_IMPLEMENTED }
+    AreaSample sampleArea(Sampler &rng) const override {
+        float phi   = rng.next() * 2.0f * Pi; // Azimuthal angle [0, 2π]
+        float theta = std::acos(2.0f * rng.next() - 1.0f); // Polar angle [0, π]
+
+        float x = radius * std::sin(theta) * std::cos(phi);
+        float y = radius * std::sin(theta) * std::sin(phi);
+        float z = radius * std::cos(theta);
+
+        Point position(x, y, z);
+
+        AreaSample sample;
+        sample.position = position;
+        populate(sample, position);
+
+        float area = 4.0f * Pi * radius * radius; // Surface area of the sphere
+        float pdf = 1.0f / area; // Uniform distribution on the sphere's surface
+        sample.pdf = pdf;
+
+        return sample;
+    }
 
     std::string toString() const override {
         return "Sphere[radius=" + std::to_string(radius) + "]";
