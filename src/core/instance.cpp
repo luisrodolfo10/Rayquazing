@@ -85,7 +85,7 @@ bool Instance::intersect(const Ray &worldRay, Intersection &its,
         if (m_alpha) {
             // Evaluate the alpha channel at the intersection
             float alpha = m_alpha->evaluate(its.uv).r();
-            std::cout << "Alpha value is " << alpha << '\n';
+            // std::cout << "Alpha value is " << alpha << '\n';
             if (alpha < rng.next()) {
                 // Discard intersection
                 its.t = previousT;
@@ -143,6 +143,7 @@ Point Instance::getCentroid() const {
 AreaSample Instance::sampleArea(Sampler &rng) const {
     AreaSample sample = m_shape->sampleArea(rng);
     transformFrame(sample, Vector());
+    sample.position = m_transform->apply(sample.position);
     return sample;
 }
 

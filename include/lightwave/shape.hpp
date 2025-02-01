@@ -55,7 +55,7 @@ public:
      */
     virtual Point getCentroid() const = 0;
     /// @brief Samples a random point on the surface of this shape.
-    virtual AreaSample sampleArea(Sampler &rng) const { NOT_IMPLEMENTED }
+    virtual AreaSample sampleArea(Sampler &rng) const = 0;
 
     /**
      * @brief Marks that the shape is part of the scene geometry, i.e., can be
