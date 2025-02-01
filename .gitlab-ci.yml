@@ -1,6 +1,8 @@
 build:
   stage: build
   image: ghcr.io/rikorose/gcc-cmake:gcc-13
+  before_script:
+    - apt-get update && apt-get install -y liboidn-dev
   script:
     - mkdir build && cd build
     - cmake ..
