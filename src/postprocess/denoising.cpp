@@ -1,5 +1,5 @@
+#include <OpenImageDenoise/oidn.hpp>
 #include <lightwave.hpp>
-#include <oidn.hpp>
 
 namespace lightwave {
 // Reference: https://www.openimagedenoise.org/documentation.html
