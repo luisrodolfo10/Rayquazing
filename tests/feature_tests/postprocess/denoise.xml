@@ -1,92 +1,91 @@
-<test type="image" id="denoise_map">
-    <scene id="scene">
-        <camera type="perspective" id="camera">
-            <integer name="width" value="400" />
-            <integer name="height" value="480" />
+<scene id="scene">
+    <camera type="perspective" id="camera">
+        <integer name="width" value="400" />
+        <integer name="height" value="480" />
 
-            <string name="fovAxis" value="x" />
-            <float name="fov" value="40" />
+        <string name="fovAxis" value="x" />
+        <float name="fov" value="40" />
 
-            <transform>
-                <translate y="0.215" z="-3" />
-            </transform>
-        </camera>
+        <transform>
+            <translate y="0.215" z="-3" />
+        </transform>
+    </camera>
 
-        <light type="envmap">
-            <texture type="constant" value="0.1" />
-        </light>
-        <light type="directional" direction="-1,-1,-1" intensity="2.5" />
+    <light type="envmap">
+        <texture type="constant" value="0.1" />
+    </light>
+    <light type="directional" direction="-1,-1,-1" intensity="2.5" />
 
-        <bsdf type="diffuse" id="wall material">
-            <texture name="albedo" type="constant" value="0.9" />
+    <bsdf type="diffuse" id="wall material">
+        <texture name="albedo" type="constant" value="0.9" />
+    </bsdf>
+
+
+    <instance id="floor">
+        <shape type="rectangle" />
+
+        <ref id="wall material" />
+        <texture name="normal" type="image" id="normals">
+            <image filename="../../textures/bricks_normal.png" linear="true" />
+        </texture>
+
+        <transform>
+            <rotate axis="1,0,0" angle="90" />
+            <translate y="1" />
+        </transform>
+    </instance>
+
+    <instance>
+        <shape type="sphere" />
+        <bsdf type="roughconductor">
+            <texture name="reflectance" type="constant" value="1,0.7,0.3" />
+            <texture name="roughness" type="constant" value="0.5" />
         </bsdf>
+        <!-- TODO: is the image data linear? -->
+        <texture type="image" name="normal"
+            filename="../../textures/bricks_normal.png" linear="true" />
+        <transform>
+            <scale value="0.5" />
+            <translate y="0.5" z="-0.1" />
+        </transform>
+    </instance>
 
+    <instance id="wall">
+        <shape type="rectangle" />
+        <ref id="wall material" />
+        <texture name="normal" type="image" id="normals">
+            <image filename="../../textures/bricks_normal.png" linear="true" />
+        </texture>
+        <transform>
+            <rotate axis="1,0,0" angle="180" />
+            <translate z="1" />
+        </transform>
+    </instance>
+</scene>
+<!-- How to integrate the postprocessing is explained in exporter.py (a chunk with "if False") -->
 
-        <instance id="floor">
-            <shape type="rectangle" />
+<integrator type="pathtracer" depth="4">
+    <ref id="scene" />
+    <image id="input"/>
+    <sampler type="independent" count="64" />
+</integrator>
 
-            <ref id="wall material" />
-            <texture name="normal" type="image" id="normals">
-                <image filename="../../textures/bricks_normal.png" linear="true" />
-            </texture>
+<!-- <integrator type="aov" variable="normals">
+    <ref id="scene" />
+    <image id="normal"/>        
+    <sampler type="independent" count="64" />
+</integrator> -->
 
-            <transform>
-                <rotate axis="1,0,0" angle="90" />
-                <translate y="1" />
-            </transform>
-        </instance>
+<integrator type="aov" variable="normals">
+    <ref id="scene" /> 
+    <image id="albedo"/>       
+    <sampler type="independent" count="64" />
+</integrator> 
 
-        <instance>
-            <shape type="sphere" />
-            <bsdf type="roughconductor">
-                <texture name="reflectance" type="constant" value="1,0.7,0.3" />
-                <texture name="roughness" type="constant" value="0.5" />
-            </bsdf>
-            <!-- TODO: is the image data linear? -->
-            <texture type="image" name="normal"
-                filename="../../textures/bricks_normal.png" linear="true" />
-            <transform>
-                <scale value="0.5" />
-                <translate y="0.5" z="-0.1" />
-            </transform>
-        </instance>
+<postprocess type="denoising" id="denoising">
+    <ref name="input" id="input" />
+    <ref name="albedo" id="albedo" />
+    <!-- <ref name="normal" id="normal" />  -->
+    <image id="output" />
+</postprocess>
 
-        <instance id="wall">
-            <shape type="rectangle" />
-            <ref id="wall material" />
-            <texture name="normal" type="image" id="normals">
-                <image filename="../../textures/bricks_normal.png" linear="true" />
-            </texture>
-            <transform>
-                <rotate axis="1,0,0" angle="180" />
-                <translate z="1" />
-            </transform>
-        </instance>
-    </scene>
-    <!-- How to integrate the postprocessing is explained in exporter.py (a chunk with "if False") -->
-
-    <integrator type="pathtracer" depth="4">
-        <ref id="scene" />
-        <image id="input" name="input"/>
-        <sampler type="independent" count="64" />
-    </integrator>
-
-    <integrator type="aov" variable="normals">
-        <ref id="scene" />
-        <image id="albedo" name="albedo"/>        
-        <sampler type="independent" count="64" />
-    </integrator>
-
-    <integrator type="aov" variable="normals">
-        <ref id="scene" /> 
-        <image id="normals" name="normals"/>       
-        <sampler type="independent" count="64" />
-    </integrator>
-
-    <postprocess type="denoising" id="denoising">
-        <ref name="input" id="input" />
-        <ref name="albedo" id="albedo" />
-        <ref name="normals" id="normals" />
-        <image name="output" id="output" />
-    </postprocess>
-</test>

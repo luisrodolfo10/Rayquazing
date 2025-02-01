@@ -10,15 +10,16 @@ class Denoising : public Postprocess {
 
 public:
     Denoising(const Properties &properties) : Postprocess(properties) {
-        m_normals = properties.get<Image>("normals");
-        m_albedo  = properties.get<Image>("albedo");
         // m_input   = properties.get<Image>("input");
+        m_normals = properties.getOptional<Image>("normal");
+        m_albedo  = properties.getOptional<Image>("albedo");
     }
 
     void execute() override {
         Point2i m_resolution = m_input->resolution();
         int width            = m_resolution.x();
         int height           = m_resolution.y();
+
         // Create an Open Image Denoise device
         oidn::DeviceRef device = oidn::newDevice(); // CPU or GPU if available
         // oidn::DeviceRef device = oidn::newDevice(oidn::DeviceType::CPU);
@@ -26,27 +27,46 @@ public:
 
         // Create buffers for input/output images accessible by both host (CPU)
         // and device (CPU/GPU)
-        oidn::BufferRef colorBuf =
-            device.newBuffer(width * height * 3 * sizeof(float));
-        oidn::BufferRef albedoBuf =
-            device.newBuffer(width * height * 3 * sizeof(float));
-        oidn::BufferRef normalBuf =
-            device.newBuffer(width * height * 3 * sizeof(float));
-        oidn::BufferRef outputBuf =
-            device.newBuffer(width * height * 3 * sizeof(float));
+        // oidn::BufferRef colorBuf = device.newBuffer(
+        //     m_input->data(), width * height * 3 * sizeof(float));
+        // oidn::BufferRef albedoBuf = device.newBuffer(
+        //     m_albedo->data(), width * height * 3 * sizeof(float));
+        // oidn::BufferRef normalBuf = device.newBuffer(
+        //     m_normals->data(), width * height * 3 * sizeof(float));
+        // oidn::BufferRef outputBuf = device.newBuffer(
+        //     m_output->data(), width * height * 3 * sizeof(float));
+        m_output->initialize(m_resolution);
 
         // Create a filter for denoising a beauty (color) image using optional
         // auxiliary images too This can be an expensive operation, so try no to
         // create a new filter for every image!
         oidn::FilterRef filter =
             device.newFilter("RT"); // generic ray tracing filter
-        filter.setImage("color", colorBuf, oidn::Format::Float3, width, height);
         filter.setImage(
-            "albedo", albedoBuf, oidn::Format::Float3, width, height);
-        filter.setImage(
-            "normals", normalBuf, oidn::Format::Float3, width, height);
+            "color", m_input->data(), oidn::Format::Float3, width, height);
+        if (!m_albedo) {
+            std::cout << "Albedo not available for postprocessing" << std::endl;
+
+        } else {
+            filter.setImage("albedo",
+                            m_albedo->data(),
+                            oidn::Format::Float3,
+                            width,
+                            height);
+        }
+        if (!m_normals) {
+            std::cout << "Normals not available for postprocessing"
+                      << std::endl;
+        } else {
+            filter.setImage("normals",
+                            m_normals->data(),
+                            oidn::Format::Float3,
+                            width,
+                            height);
+        }
+
         filter.setImage("output",
-                        outputBuf,
+                        m_output->data(),
                         oidn::Format::Float3,
                         width,
                         height); // denoised
@@ -63,13 +83,7 @@ public:
             std::cout << "Error: " << errorMessage << std::endl;
         }
 
-        float *outputPtr  = (float *) outputBuf.getData();
-        Color *outputData = m_output->data();
-
-        for (int i = 0; i < width * height; ++i) {
-            outputData[i] = Color(
-                outputPtr[i * 3], outputPtr[i * 3 + 1], outputPtr[i * 3 + 2]);
-        }
+        m_output->save();
     };
 
     std::string toString() const override {
