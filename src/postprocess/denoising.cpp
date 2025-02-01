@@ -1,3 +1,4 @@
+#ifdef LW_WITH_OIDN
 #include <OpenImageDenoise/oidn.hpp>
 #include <lightwave.hpp>
 
@@ -99,3 +100,4 @@ public:
 } // namespace lightwave
 
 REGISTER_POSTPROCESS(Denoising, "denoising")
+#endif
