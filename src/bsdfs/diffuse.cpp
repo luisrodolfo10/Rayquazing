@@ -12,10 +12,13 @@ public:
 
     BsdfEval evaluate(const Point2 &uv, const Vector &wo,
                       const Vector &wi) const override {
-        Color color = Color(m_albedo->evaluate(uv) / Pi); 
+        Color color = Color(m_albedo->evaluate(uv) / Pi);
         color *= abs(wi.normalized().z());
         BsdfEval bsdf = BsdfEval();
         if (!Frame::sameHemisphere(wo, wi)) {
+            return bsdf.invalid();
+        }
+        if (std::isnan(wi.x()) || std::isnan(wi.y()) || std::isnan(wi.z())) {
             return bsdf.invalid();
         }
         bsdf.value = color;
@@ -29,7 +32,9 @@ public:
         // Assign the correct weight to the sample: evaluation of the BSDF
         // itself (how much light is reflect) multiplied by the foreshortening
         // term cos 𝜔𝑖
-
+        if (std::isnan(wi.x()) || std::isnan(wi.y()) || std::isnan(wi.z())) {
+            return BsdfSample().invalid();
+        }
         if (!Frame::sameHemisphere(wo, wi)) {
             wi = -wi; // Flip the direction
         }

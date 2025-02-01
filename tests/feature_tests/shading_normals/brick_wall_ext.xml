@@ -63,7 +63,7 @@
                     <rotate axis="0,1,0" angle="90"/>
                     <translate x="-1"/>
                 </transform>
-                <texture type="image" filename="../../textures/normal_map.png"/>
+                <texture type="image" name="normal" filename="../../textures/normal_map.png"/>
             </instance>
 
             <instance id="right wall">
@@ -75,7 +75,7 @@
                     <rotate axis="0,1,0" angle="-90"/>
                     <translate x="1"/>
                 </transform>
-                <texture type="image" filename="../../textures/normal_map.png"/>
+                <texture type="image" name="normal" filename="../../textures/normal_map.png"/>
             </instance>
 
             <instance id="lamp">
@@ -94,7 +94,7 @@
             </instance>
 
             <instance>
-                <shape type="MandelBulb"/>
+                <shape type="sphere"/>
                 <bsdf type="diffuse">
                     <texture name="albedo" type="constant" value="0.9"/>
                 </bsdf>
@@ -138,6 +138,7 @@
                     <scale z="-1"/>
                     <translate z="1"/>
                 </transform>
+                <texture type="image" name="normal" filename="../../textures/normal_map.png"/>
             </instance>
 
             <instance id="floor">
@@ -147,6 +148,7 @@
                     <rotate axis="1,0,0" angle="90"/>
                     <translate y="1"/>
                 </transform>
+                <texture type="image" name="normal" filename="../../textures/normal_map.png"/>
             </instance>
 
             <instance id="ceiling">
@@ -156,7 +158,7 @@
                     <rotate axis="1,0,0" angle="-90"/>
                     <translate y="-1"/>
                 </transform>
-                <texture type="image" filename="../../textures/normal_map.png"/>
+                <texture type="image" name="normal" filename="../../textures/normal_map.png"/>
             </instance>
 
             <instance id="left wall">
@@ -168,7 +170,7 @@
                     <rotate axis="0,1,0" angle="90"/>
                     <translate x="-1"/>
                 </transform>
-                <texture type="image" filename="../../textures/normal_map.png"/>
+                <texture type="image" name="normal" filename="../../textures/normal_map.png"/>
             </instance>
 
             <instance id="right wall">
@@ -180,11 +182,11 @@
                     <rotate axis="0,1,0" angle="-90"/>
                     <translate x="1"/>
                 </transform>
-                <texture type="image" filename="../../textures/normal_map.png"/>
+                <texture type="image" name="normal" filename="../../textures/normal_map.png"/>
             </instance>
 
             <instance>
-                <shape type="mandelbulb"/>
+                <shape type="sphere"/>
                 <bsdf type="diffuse">
                     <texture name="albedo" type="constant" value="0.9"/>
                 </bsdf>
@@ -192,7 +194,7 @@
                     <scale value="0.5"/>
                     <translate y="0.5" z="-0.1"/>
                 </transform>
-                <!-- <texture type="image" filename="../../textures/normal_map.png"/> -->
+                <texture type="image" name="normal" filename="../../textures/normal_map.png"/>
             </instance>
         </scene>
         <sampler type="independent" count="128"/>

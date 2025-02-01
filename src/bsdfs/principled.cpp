@@ -10,6 +10,9 @@ struct DiffuseLobe {
 
     BsdfEval evaluate(const Vector &wo, const Vector &wi) const {
         BsdfEval bsdf = BsdfEval();
+        if (!Frame::sameHemisphere(wi, wo)) {
+            return BsdfEval().invalid();
+        }
         bsdf.value = color / Pi;
         bsdf.value *= abs(wi.z());
         return BsdfEval(bsdf);
@@ -33,14 +36,20 @@ struct MetallicLobe {
     BsdfEval evaluate(const Vector &wo, const Vector &wi) const {
         Vector wh = (wi + wo).normalized();
         Color R   = color;
+
+        if (std::isnan(wi.x()) || std::isnan(wi.y()) || std::isnan(wi.z())) {
+            return BsdfEval().invalid();
+        }
+
+        float cosThetao = Frame::absCosTheta(wo);
+        float cosThetai = Frame::absCosTheta(wi);
+        if (cosThetao == 0 || cosThetai == 0) {
+            return BsdfEval(); // Invalid
+        }
+
         float D   = microfacet::evaluateGGX(alpha, wh);
         float Gwi = microfacet::smithG1(alpha, wh, wi);
         float Gwo = microfacet::smithG1(alpha, wh, wo);
-
-        float cosThetao = Frame::absCosTheta(wo);
-        if (cosThetao == 0) {
-            return BsdfEval(); // Invalid
-        }
 
         Color Fr      = (R * D * Gwi * Gwo) / (4 * cosThetao);
         BsdfEval bsdf = BsdfEval();

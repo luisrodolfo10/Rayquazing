@@ -18,21 +18,22 @@ public:
         std::cout << "Computing normal at Point: (" << p[0] << ", " << p[1]
                   << ", " << p[2] << ")" << std::endl;
         const float h = 0.00001f; // Small step
-        return Vector(            // central differences
-            (getMandelbulbDistance(Point(p[0] + h, p[1], p[2])) -
-             getMandelbulbDistance(Point(p[0] - h, p[1], p[2]))) /
-                2,
-            (getMandelbulbDistance(Point(p[0], p[1] + h, p[2])) -
-             getMandelbulbDistance(Point(p[0], p[1] - h, p[2]))) /
-                2,
-            (getMandelbulbDistance(Point(p[0], p[1], p[2] + h)) -
-             getMandelbulbDistance(Point(p[0], p[1], p[2] - h))) /
-                2);
+        return
+            // Vector(            // central differences
+            //     (getMandelbulbDistance(Point(p[0] + h, p[1], p[2])) -
+            //      getMandelbulbDistance(Point(p[0] - h, p[1], p[2]))) /
+            //         2,
+            //     (getMandelbulbDistance(Point(p[0], p[1] + h, p[2])) -
+            //      getMandelbulbDistance(Point(p[0], p[1] - h, p[2]))) /
+            //         2,
+            //     (getMandelbulbDistance(Point(p[0], p[1], p[2] + h)) -
+            //      getMandelbulbDistance(Point(p[0], p[1], p[2] - h))) /
+            //         2);
 
-        // Vector( // forward differences (more efficient)
-        //     getMandelbulbDistance(Point(p[0] + h, p[1], p[2])),
-        //     getMandelbulbDistance(Point(p[0], p[1] + h, p[2])),
-        //     getMandelbulbDistance(Point(p[0], p[1], p[2] + h)));
+            Vector( // forward differences (more efficient)
+                getMandelbulbDistance(Point(p[0] + h, p[1], p[2])),
+                getMandelbulbDistance(Point(p[0], p[1] + h, p[2])),
+                getMandelbulbDistance(Point(p[0], p[1], p[2] + h)));
     }
 
     bool intersect(const Ray &ray, Intersection &its,
@@ -54,10 +55,12 @@ public:
             }
         }
         if (dist < Epsilon && totalDistance > Epsilon) {
-            its.position       = currentPos;
-            its.t              = totalDistance;
-            its.geometryNormal = computeNormal(currentPos).normalized();
-            its.shadingNormal  = its.geometryNormal;
+            its.position = currentPos;
+            its.t        = totalDistance;
+            its.geometryNormal =
+                Vector(currentPos)
+                    .normalized(); // computeNormal(currentPos).normalized();
+            its.shadingNormal = its.geometryNormal;
 
             Vector up = { 0, 1, 0 };
             if (abs(its.geometryNormal[1]) > 0.99f) {
@@ -114,10 +117,10 @@ public:
     AreaSample sampleArea(Sampler &rng) const override{ NOT_IMPLEMENTED }
 
     std::string toString() const override {
-        return "MandelBulb";
+        return "mandelbulb";
     }
 };
 
 } // namespace lightwave
 
-REGISTER_SHAPE(MandelBulb, "MandelBulb");
+REGISTER_SHAPE(MandelBulb, "mandelbulb");

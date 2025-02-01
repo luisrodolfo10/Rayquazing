@@ -1,0 +1,65 @@
+<scene id="scene">
+  <camera type="perspective">
+    <integer name="width" value="1920"/>
+    <integer name="height" value="1080"/>
+    <float name="fov" value="55.223"/>
+    <string name="fovAxis" value="x"/>
+    <transform>
+      <matrix value="0.68592,0.32401,-0.65156,7.3589,  0.72768,-0.30542,0.61417,-6.9258,  -4.0113e-09,-0.8954,-0.44527,4.9583,  0,0,0,1"/>
+    </transform>
+  </camera>
+  <instance>
+    <bsdf type="principled">
+      <texture name="baseColor" type="image" filename="textures/Clay004_2K_Color.jpg"/>
+      <texture name="roughness" type="image" filename="textures/Clay004_2K_Roughness.jpg" linear="true"/>
+      <texture name="metallic" type="constant" value="0"/>
+      <texture name="specular" type="constant" value="0"/>
+    </bsdf>
+    <texture name="normal" type="constant" value="0"/>
+    <shape type="mesh" filename="meshes/Circle.ply"/>
+    <transform>
+      <matrix value="2.7824,0.033423,0.046975,0,  -0.034254,2.7824,0.049232,0,  -0.046373,-0.049799,2.7822,0,  0,0,0,1"/>
+    </transform>
+  </instance>
+  <instance>
+    <emission type="lambertian">
+      <texture name="emission" type="constant" value="0"/>
+    </emission>
+    <shape type="mesh" filename="meshes/Plant.ply"/>
+    <transform>
+      <matrix value="2.783,0,0,0,  0,2.783,0,0,  0,0,2.783,0,  0,0,0,1"/>
+    </transform>
+  </instance>
+  <instance>
+    <bsdf type="diffuse">
+      <texture name="albedo" type="image" filename="textures/ClayPicture.jpg"/>
+    </bsdf>
+    <shape type="mesh" filename="meshes/Plane.001.ply"/>
+    <transform>
+      <matrix value="2.783,0,0,0,  0,2.783,0,0,  0,0,2.783,0,  0,0,0,1"/>
+    </transform>
+  </instance>
+  <light type="area">
+    <instance>
+      <shape type="sphere"/>
+      <transform>
+        <scale value="0.1"/>
+        <translate x="4.0762" y="1.0055" z="5.9039"/>
+      </transform>
+      <emission type="lambertian">
+        <texture name="emission" type="constant" value="2533,2533,2533"/>
+      </emission>
+    </instance>
+  </light>
+  <light type="envmap">
+    <texture type="constant" value="0.050876,0.050876,0.050876"/>
+    <transform>
+      <matrix value="1,0,0,0,  0,0,1,0,  0,-1,0,0,  0,0,0,1"/>
+    </transform>
+  </light>
+</scene>
+<integrator type="pathtracer" depth="10">
+  <ref id="scene"/>
+  <image id="noisy"/>
+  <sampler type="independent" count="64"/>
+</integrator>
