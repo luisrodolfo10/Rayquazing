@@ -10,7 +10,7 @@ public:
     Color Li(const Ray &ray, Sampler &rng) override {
         Intersection its = m_scene->intersect(ray, rng);
         if (its) {
-            // Evaluate the BSDF at the intersection to get the albedo.
+            // Sample the BSDF at the intersection.
             BsdfSample sample = its.sampleBsdf(rng);
             Color albedo      = sample.weight;
             return albedo;
