@@ -8,30 +8,15 @@ namespace lightwave {
 void Instance::transformFrame(SurfaceEvent &surf, const Vector &wo) const {
     Frame shadingFrame = surf.shadingFrame();
 
-    if (m_normal) {
-        Color normal_col = m_normal->evaluate(surf.uv);
-        // Normal values are in [0, 1] and should be remaped to [-1, 1]
-        Vector normal_vec = Vector(2 * normal_col.r() - 1,
-                                   2 * normal_col.g() - 1,
-                                   2 * normal_col.b() - 1);
-        float flip_tangent =
-            shadingFrame.bitangent.cross(normal_vec).dot(shadingFrame.tangent);
-        if (flip_tangent > 0.0f) {
-            shadingFrame.tangent = -shadingFrame.tangent;
-        }
-        normal_vec = normal_vec.x() * shadingFrame.tangent +
-                     normal_vec.y() * shadingFrame.bitangent +
-                     normal_vec.z() * shadingFrame.normal;
-        // Code based from:
-        // https://learnopengl.com/Advanced-Lighting/Normal-Mapping
-        shadingFrame.normal = m_transform->applyNormal(normal_vec).normalized();
-    } else {
-        shadingFrame.normal =
-            m_transform->applyNormal(shadingFrame.normal).normalized();
-    }
     shadingFrame.tangent =
         m_transform->apply(shadingFrame.tangent).normalized();
-    surf.tangent        = shadingFrame.tangent;
+    shadingFrame.normal =
+        m_transform->applyNormal(shadingFrame.normal).normalized();
+    shadingFrame.bitangent =
+        shadingFrame.normal.cross(shadingFrame.tangent).normalized();
+
+    surf.tangent = shadingFrame.tangent;
+
     surf.geometryNormal = shadingFrame.normal;
     surf.shadingNormal  = surf.geometryNormal;
 }
@@ -65,22 +50,7 @@ inline void validateIntersection(const Intersection &its) {
 
 bool Instance::intersect(const Ray &worldRay, Intersection &its,
                          Sampler &rng) const {
-
-    // if (m_transform) {
-    //     std::cout << "Transform!\n";
-    //     // Color normal_colour = m_normal->evaluate(surf.uv);
-    // } else {
-    //     std::cout << "No transform!";
-    //     // Color normal_colour = m_normal->evaluate(surf.uv);
-    // }
-    // if (m_normal) {
-    //     std::cout << "Evaluating normal map texture.\n";
-    //     // Color normal_colour = m_normal->evaluate(surf.uv);
-    // } else {
-    //     std::cout << "No normal!";
-    //     // Color normal_colour = m_normal->evaluate(surf.uv);
-    // }
-    if (!m_transform && !m_normal) {
+    if (!m_transform) {
         // fast path, if no transform is needed
         const Ray localRay        = worldRay;
         const bool wasIntersected = m_shape->intersect(localRay, its, rng);
