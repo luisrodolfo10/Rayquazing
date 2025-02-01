@@ -8,9 +8,9 @@ class Sphere : public Shape {
 
     inline void populate(SurfaceEvent &surf, const Point &position) const {
         surf.position = position;
-        float phi     = atan2(position[0], position[2]);
-        float theta   = acos(position[1] / radius);
-        float u       = (phi + Pi) / (2 * Pi);
+        float phi     = atan2(-position[2], position[0]);
+        float theta   = acos(position[1]);
+        float u       = (phi + Pi) * Inv2Pi;
         float v       = theta / Pi;
         surf.uv       = Point2(u, v);
 

@@ -23,19 +23,27 @@ public:
 
         Vector wh = (wi + wo).normalized();
         Color R   = m_reflectance->evaluate(uv);
+
+        if (std::isnan(wi.x()) || std::isnan(wi.y()) || std::isnan(wi.z())) {
+            return BsdfEval().invalid();
+        }
+
+        float cosThetao = Frame::absCosTheta(wo);
+        float cosThetai = Frame::absCosTheta(wi);
+
+        if (cosThetao == 0 || cosThetai == 0) {
+            return BsdfEval().invalid(); // Invalid
+        }
+
         float D   = microfacet::evaluateGGX(alpha, wh);
         float Gwi = microfacet::smithG1(alpha, wh, wi);
         float Gwo = microfacet::smithG1(alpha, wh, wo);
 
-        float cosThetao = Frame::absCosTheta(wo);
-        if (cosThetao == 0) {
-            return BsdfEval(); // Invalid
-        }
-
         // cosththetai get cancelled due to multiplication
         Color Fr      = (R * D * Gwi * Gwo) / (4 * cosThetao);
         BsdfEval bsdf = BsdfEval();
-        bsdf.value    = Fr;
+
+        bsdf.value = Fr;
         return BsdfEval(bsdf);
     }
 
@@ -46,6 +54,16 @@ public:
         Vector wh =
             microfacet::sampleGGXVNDF(alpha, wo, rng.next2D()).normalized();
         Vector wi = reflect(wo, wh).normalized(); // wi has the jacobian term
+
+        if (std::isnan(wi.x()) || std::isnan(wi.y()) || std::isnan(wi.z())) {
+            return BsdfSample().invalid();
+        }
+
+        float cosThetai = Frame::cosTheta(wi);
+
+        if (cosThetai == 0) {
+            return BsdfSample().invalid(); // Invalid sample
+        }
 
         Color R   = m_reflectance->evaluate(uv);
         float Gwi = microfacet::smithG1(alpha, wh, wi);

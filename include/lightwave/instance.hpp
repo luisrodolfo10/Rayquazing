@@ -44,7 +44,10 @@ class Instance : public Shape {
     bool m_visible;
     /// @brief Loads an additional texture that describes the normals of the
     /// underlying geometry
-    ref<Transform> m_normal;
+    ref<Texture> m_normal;
+    /// @brief Loads an additional texture that describes the alpha masking of
+    /// the underlying geometry
+    ref<Texture> m_alpha;
 
     /// @brief Transforms the frame from object coordinates to world
     /// coordinates.
@@ -56,6 +59,8 @@ public:
         m_bsdf      = properties.getOptionalChild<Bsdf>();
         m_emission  = properties.getOptionalChild<Emission>();
         m_transform = properties.getOptionalChild<Transform>();
+        m_normal    = properties.getOptional<Texture>("normal");
+        m_alpha     = properties.getOptional<Texture>("alpha");
         m_visible   = false;
     }
 
@@ -70,7 +75,10 @@ public:
     /// @brief Returns the light object that contains this instance (or null if
     /// this instance is not part of any area light).
     Light *light() const { return m_light; }
-
+    ///  @brief Returns the normal mapping texture of the shape
+    Texture *normal() const { return m_normal.get(); }
+    ///  @brief Returns the alpha masking texture of the shape
+    Texture *alpha() const { return m_alpha.get(); }
     /// @brief Returns whether this instance has been added to the scene, i.e.,
     /// could be hit by ray tracing.
     bool isVisible() const { return m_visible; }
@@ -118,11 +126,14 @@ public:
             "  bsdf = %s,\n"
             "  emission = %s,\n"
             "  transform = %s,\n"
+            "  normal = %s,\n"
             "]",
             indent(m_shape),
             indent(m_bsdf),
             indent(m_emission),
-            indent(m_transform));
+            indent(m_transform),
+            indent(m_normal),
+            indent(m_alpha));
     }
 };
 
