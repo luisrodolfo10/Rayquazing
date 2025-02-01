@@ -108,7 +108,7 @@
     </integrator>
 </test> -->
 
-<test type="image" id="multi_light_point_try">
+<test type="image" id="multi_light_point_mandel">
     <integrator type="direct">
         <scene id="scene">
             <camera type="perspective" id="camera">
