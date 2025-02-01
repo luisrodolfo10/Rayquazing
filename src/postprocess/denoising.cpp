@@ -19,7 +19,6 @@ public:
         Point2i m_resolution = m_input->resolution();
         int width            = m_resolution.x();
         int height           = m_resolution.y();
-
         // Create an Open Image Denoise device
         oidn::DeviceRef device = oidn::newDevice(); // CPU or GPU if available
         // oidn::DeviceRef device = oidn::newDevice(oidn::DeviceType::CPU);
