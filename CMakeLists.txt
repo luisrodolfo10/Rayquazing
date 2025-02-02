@@ -81,7 +81,11 @@ file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
 set(MY_TARGET_NAME Rayquazing) # Change `unnamed` to your favorite executable name
 # ######################
 
-find_package(OpenImageDenoise)
+set(OIDN_DIR "${CMAKE_SOURCE_DIR}/include/OpenImageDenoise")
+
+find_package(OpenImageDenoise REQUIRED CONFIG PATHS ${OIDN_DIR})
+
+#find_package(OpenImageDenoise)
 
 add_executable(${MY_TARGET_NAME} ${SOURCE_FILES})
 target_compile_definitions(${MY_TARGET_NAME} PUBLIC "${FEATURES};${EXTRA_DEFINES}")
