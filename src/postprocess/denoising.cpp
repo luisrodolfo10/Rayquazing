@@ -25,63 +25,85 @@ public:
         // oidn::DeviceRef device = oidn::newDevice(oidn::DeviceType::CPU);
         device.commit();
 
-        // Create buffers for input/output images accessible by both host (CPU)
-        // and device (CPU/GPU)
-        // oidn::BufferRef colorBuf = device.newBuffer(
-        //     m_input->data(), width * height * 3 * sizeof(float));
-        // oidn::BufferRef albedoBuf = device.newBuffer(
-        //     m_albedo->data(), width * height * 3 * sizeof(float));
-        // oidn::BufferRef normalBuf = device.newBuffer(
-        //     m_normals->data(), width * height * 3 * sizeof(float));
-        // oidn::BufferRef outputBuf = device.newBuffer(
-        //     m_output->data(), width * height * 3 * sizeof(float));
-        m_output->initialize(m_resolution);
+        // Allocate buffers using OIDN
+        oidn::BufferRef colorBuf = device.newBuffer(
+            width * height * 3 * sizeof(float), oidn::Storage::Host);
+        oidn::BufferRef outputBuf = device.newBuffer(
+            width * height * 3 * sizeof(float), oidn::Storage::Host);
 
-        // Create a filter for denoising a beauty (color) image using optional
-        // auxiliary images too This can be an expensive operation, so try no to
-        // create a new filter for every image!
+        // Copy input data to the OIDN buffer
+        std::memcpy(colorBuf.getData(),
+                    m_input->data(),
+                    width * height * 3 * sizeof(float));
+
+        // Debugging: Check if input data is valid
+        std::cout << "[debug] First pixel (input): "
+                  << static_cast<float *>(colorBuf.getData())[0] << ", "
+                  << static_cast<float *>(colorBuf.getData())[1] << ", "
+                  << static_cast<float *>(colorBuf.getData())[2] << std::endl;
+
+        // Optional buffers for auxiliary features
+        oidn::BufferRef albedoBuf, normalBuf;
+        if (m_albedo) {
+            albedoBuf = device.newBuffer(width * height * 3 * sizeof(float),
+                                         oidn::Storage::Host);
+            std::memcpy(albedoBuf.getData(),
+                        m_albedo->data(),
+                        width * height * 3 * sizeof(float));
+        }
+        if (m_normals) {
+            normalBuf = device.newBuffer(width * height * 3 * sizeof(float),
+                                         oidn::Storage::Host);
+            std::memcpy(normalBuf.getData(),
+                        m_normals->data(),
+                        width * height * 3 * sizeof(float));
+        }
+
+        // Create a denoising filter
         oidn::FilterRef filter =
-            device.newFilter("RT"); // generic ray tracing filter
+            device.newFilter("RT"); // "RT" = ray tracing filter
+        filter.setImage("color", colorBuf, oidn::Format::Float3, width, height);
+
+        if (m_albedo) {
+            filter.setImage(
+                "albedo", albedoBuf, oidn::Format::Float3, width, height);
+        }
+        if (m_normals) {
+            filter.setImage(
+                "normal", normalBuf, oidn::Format::Float3, width, height);
+        }
+
         filter.setImage(
-            "color", m_input->data(), oidn::Format::Float3, width, height);
-        if (!m_albedo) {
-            std::cout << "Albedo not available for postprocessing" << std::endl;
-
-        } else {
-            filter.setImage("albedo",
-                            m_albedo->data(),
-                            oidn::Format::Float3,
-                            width,
-                            height);
-        }
-        if (!m_normals) {
-            std::cout << "Normals not available for postprocessing"
-                      << std::endl;
-        } else {
-            filter.setImage("normals",
-                            m_normals->data(),
-                            oidn::Format::Float3,
-                            width,
-                            height);
-        }
-
-        filter.setImage("output",
-                        m_output->data(),
-                        oidn::Format::Float3,
-                        width,
-                        height); // denoised
-
+            "output", outputBuf, oidn::Format::Float3, width, height);
         filter.set("hdr", true);
         filter.commit();
 
-        // Filter the beauty image
+        // Execute denoising
         filter.execute();
 
         // Check for errors
         const char *errorMessage;
         if (device.getError(errorMessage) != oidn::Error::None) {
-            std::cout << "Error: " << errorMessage << std::endl;
+            std::cerr << "[OIDN ERROR] " << errorMessage << std::endl;
         }
+
+        // Debugging: Check if output data is valid
+        std::cout << "[debug] First pixel (output before copy): "
+                  << static_cast<float *>(outputBuf.getData())[0] << ", "
+                  << static_cast<float *>(outputBuf.getData())[1] << ", "
+                  << static_cast<float *>(outputBuf.getData())[2] << std::endl;
+
+        // Copy denoised data back to output
+        // Segmentation fault
+        m_output->initialize(m_resolution);
+        std::memcpy(m_output->data(),
+                    outputBuf.getData(),
+                    width * height * 3 * sizeof(float));
+
+        // Debugging: Check if final output data is valid
+        std::cout << "[debug] First pixel (final output): "
+                  << m_output->data()[0] << ", " << m_output->data()[1] << ", "
+                  << m_output->data()[2] << std::endl;
 
         m_output->save();
     };
