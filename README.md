@@ -6,9 +6,7 @@ Rayquazing builds on top of **Lightwave**, an educational framework designed to 
 
 ---
 
-## Based on: Lightwave
-
-> *“Lightwave provides the boring boilerplate, so you can focus on the insightful parts.”*
+##
 
 - Modular, plugin-based architecture  
 - Scene description via XML  
