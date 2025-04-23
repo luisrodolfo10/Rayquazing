@@ -1,0 +1,479 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Rayquazing features</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="icon" type="image/png" href="assets/favicon_io/favicon.ico">
+		<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon_io/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon_io/favicon-16x16.png">
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<link rel="stylesheet" href="assets/css/twentytwenty.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+				<header id="header" style="margin-bottom: 0px; padding-bottom: 100px;">
+					<a class="logo">Rayquazing</a>
+					<br>
+					<p style="font-size: 14px; margin-bottom: 0; padding-bottom: 0;">Alejandro Campayo Fernández & Luis Rodolfo Macias</p>
+				</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li><a href="index.html">Our scene</a></li>
+							<li class="active"><a href="features.html">Our features</a></li>
+							<li><a href="others.html">Others</a></li>
+						</ul>
+						<ul class="icons">
+							<li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+						</ul>
+					</nav>
+				
+				<!-- Main -->
+				<div id="main">
+					<!-- Header -->
+					<header style="text-align: center;">
+						<h2>Features implemented in our scene</h2>
+					</header>
+
+					<!-- Posts -->
+						<section class="posts">
+							<article>
+								<header>
+									<h2>Shading normals</h2>
+								</header>
+								
+								<div class="twentytwenty-container" style="width: 100%">
+									<img src="images/scene/no_normal.jpeg" alt="Before" class="img-responsive center-block">
+									<img src="images/scene/postprocessed.jpeg" alt="After" class="img-responsive center-block">
+								</div>
+								
+								<p>Shading normals uses an additional texture to define surface normals, allowing for detailed shading effects without increasing mesh complexity.</p>
+								<p><strong>In our scene, </strong> the shading normals are responsible for enhancing the quality of the meshes of the sword, the stone columns and the stones at the floor. 
+									However, we noticed these normal textures avoid the shields from reflecting light and therefore we decided to remove the normals of these meshes.</p>
+
+								<ul class="actions special">
+									<li><a href="#" class="button full-story-btn" onclick="toggleText(this)">Further details</a></li>
+								</ul>
+							
+								<!-- Hidden Content -->
+								<div class="full-story-content" id="storyContent">
+									<li><strong>Source code:</strong></li>
+									<ul>
+										<code><a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">include/lightwave/instance.hpp</a></code>
+									</ul>
+									<ul>
+										<code><a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">src/core/instance.cpp</a></code>
+									</ul>
+									
+									<li><strong>Simple test:</strong></li>
+									<ul>
+										<code><a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">/tests/feature_tests/shading_normals/normal.xml</a></code>
+									</ul>
+									<div class="twentytwenty-container" style="width: 100%">
+										<img src="images/features/normals/normal_before.png" alt="Before" class="img-responsive center-block">
+										<img src="images/features/normals/normal_after.png" alt="After" class="img-responsive center-block">
+									</div>
+									<br>
+									<li><strong>Texture:</strong></li> <br>
+									<div class="image main" style="width: 60%; margin: auto; text-align: center;">
+										<img src="images/features/normals/normal_texture.png" alt="" style="display: block; margin: auto;" />
+									</div>
+									<br>
+									<li><strong>References:</strong></li>
+									<p>Our implementation was based on <a href="https://learnopengl.com/Advanced-Lighting/Normal-Mapping">LearnOpenGL</a>.</p>
+								</div>
+							</article>
+
+							<article>
+								<header>
+									<h2>Alpha masking</h2>
+								</header>
+								
+								<div class="twentytwenty-container" style="width: 100%">
+									<img src="images/scene/no_alpha.jpeg" alt="Before" class="img-responsive center-block">
+									<img src="images/scene/postprocessed.jpeg" alt="After" class="img-responsive center-block">
+								</div>
+								
+								<p>Alpha masking uses a texture to determine transparency, allowing rays to pass through based on alpha values without increasing mesh complexity.</p>
+								<p><strong>In our scene, </strong> alpha masking is responsible for letting the light through the clouds and also to enhance the quality of the meshes of the swords, 
+									with these feature we managed to make dents to the swords without modifying its meshes.</p>
+								
+								<ul class="actions special">
+									<li><a href="#" class="button full-story-btn" onclick="toggleText(this)">Further details</a></li>
+								</ul>
+							
+								<!-- Hidden Content -->
+								<div class="full-story-content" id="storyContent">
+									<li><strong>Source code:</strong></li>
+									<ul>
+										<code><a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">include/lightwave/instance.hpp</a></code>
+									</ul>
+									<ul>
+										<code><a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">src/core/instance.cpp</a></code>
+									</ul>
+									<li><strong>Simple test:</strong></li>
+									<ul>
+										<code><a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">tests/feature_tests/alpha_masking/alpha_map.xml</a></code>
+									</ul>
+									<div class="twentytwenty-container" style="width: 100%">
+										<img src="images/features/alpha_masking/alpha_before.png" alt="Before" class="img-responsive center-block">
+										<img src="images/features/alpha_masking/alpha_after.png" alt="After" class="img-responsive center-block">
+									</div>
+									<br>
+									<li><strong>Alpha mask:</strong></li> <br>
+									<div class="image main" style="width: 60%; margin: auto; text-align: center;">
+										<img src="images/features/alpha_masking/alpha.png" alt="" style="display: block; margin: auto;" />
+									</div>
+									<br>
+
+								</div>
+							</article>
+
+							<article>
+								<header>
+									<h2>Halton sampler</h2>
+								</header>
+								
+								<div class="twentytwenty-container" style="width: 100%">
+									<img src="images/scene/no_halton.jpeg" alt="Before" class="img-responsive center-block">
+									<img src="images/scene/halton.jpeg" alt="After" class="img-responsive center-block">
+								</div>
+								
+								<p>Halton sampling improves rendering quality by generating well-distributed sample points ensuring better coverage of the sample space compared to pseudo-random sampling.</p>
+								<p><strong>In our scene, </strong> we can see how halton sampling reduces the noise specially at smooth zones such as the clouds with the same amount of samples (32). This helps us get a higher quality with less computational cost.</p>
+
+								
+								<ul class="actions special">
+									<li><a href="#" class="button full-story-btn" onclick="toggleText(this)">Further details</a></li>
+								</ul>
+							
+								<!-- Hidden Content -->
+								<div class="full-story-content" id="storyContent">
+									<li><strong>Source code:</strong></li>
+									<ul>
+										<code><a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">src/sampler/halton.cpp</a></code>
+									</ul>
+									<li><strong>Distribution of Halton and Pseudo-random samples:</strong></li>
+									<div class="twentytwenty-container" style="width: 100%">
+										<img src="images/features/halton/Halton_sequence_2D.png" alt="Halton" class="img-responsive center-block">
+										<img src="images/features/halton/Pseudorandom_sequence_2D.png" alt="Random" class="img-responsive center-block">
+									</div>
+									<p style="text-align: center;">Images from  <a href="https://en.wikipedia.org/wiki/Halton_sequence">Wikipedia</a>.</p>
+									<li><strong>Simple test:</strong></li>
+									<ul>
+										<code><a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">/tests/feature_tests/halton/halton.xml</a></code>
+									</ul>
+									<div class="twentytwenty-container" style="width: 100%">
+										<img src="images/features/halton/independent.png" alt="Before" class="img-responsive center-block">
+										<img src="images/features/halton/halton.png" alt="After" class="img-responsive center-block">
+									</div>
+									<li><strong>References:</strong></li>
+									<p>Our implementation was inspired by <a href="https://www.pbr-book.org/4ed/Sampling_and_Reconstruction/Halton_Sampler#fragment-HaltonSamplerPublicMethods-0">Physically Based Rendering book (Chapter 8.6)</a>.</p>
+								</div>
+							</article>
+
+							<article>
+								<header>
+									<h2>Postprocessing</h2>
+								</header>
+								
+								<div class="twentytwenty-container" style="width: 100%">
+									<img src="images/scene/no_normal.jpeg" alt="Before" class="img-responsive center-block">
+									<img src="images/scene/bloom.jpeg" alt="After" class="img-responsive center-block">
+								</div>
+								
+								<p>Postprocessing allows us to simulate lens effects such as bloom or glare after rendering. It consist of selecting brightest areas and applying operations such as Gaussian blurring to these selected pixels.</p>
+								<p><strong>In our scene,</strong> bloom is used to highlight the reflection of the shield.</p>
+
+								
+								<ul class="actions special">
+									<li><a href="#" class="button full-story-btn" onclick="toggleText(this)">Further details</a></li>
+								</ul>
+							
+								<!-- Hidden Content -->
+								<div class="full-story-content" id="storyContent">
+									<li><strong>Source code:</strong></li>
+									<ul>
+										<code><a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">src/postprocess/glare.cpp</a></code>
+										<code><a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">src/postprocess/bloom.cpp</a></code>
+
+									</ul>
+									<li><strong>Simple test:</strong></li>
+									<ul>
+										<code><a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">tests/feature_tests/postprocess/glare.xml</a></code>
+										<code><a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">tests/feature_tests/postprocess/bloom.xml</a></code>
+										<code><a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">tests/feature_tests/postprocess/bloom_glare.xml</a></code>
+									</ul>
+									<li><strong>Bloom:</strong></li>
+									<div class="twentytwenty-container" style="width: 100%">
+										<img src="images/features/postprocess/input.png" alt="Before" class="img-responsive center-block">
+										<img src="images/features/postprocess/bloom.png" alt="After" class="img-responsive center-block">
+									</div>
+									<li><strong>Glare:</strong></li>
+									<div class="twentytwenty-container" style="width: 100%">
+										<img src="images/features/postprocess/input.png" alt="Before" class="img-responsive center-block">
+										<img src="images/features/postprocess/glare.png" alt="After" class="img-responsive center-block">
+									</div>
+									<li><strong>Bloom and glare:</strong></li>
+									<div class="twentytwenty-container" style="width: 100%">
+										<img src="images/features/postprocess/input.png" alt="Before" class="img-responsive center-block">
+										<img src="images/features/postprocess/bloom-glare.png" alt="After" class="img-responsive center-block">
+									</div>
+									<li><strong>References:</strong></li>
+									<p>Our implementation was inspired by <a href="https://support.chaos.com/hc/en-us/articles/4528607440401-How-to-use-Bloom-and-Glare-C4D">How to use Bloom and Glare? - C4D</a>.</p>
+								</div>
+							</article>
+							
+							<article>
+								<header>
+									<h2>Image denoising</h2>
+								</header>
+								
+								<div class="twentytwenty-container" style="width: 100%">
+									<img src="images/scene/no_postprocessed.jpeg" alt="Before" class="img-responsive center-block">
+									<img src="images/scene/postprocessed.jpeg" alt="After" class="img-responsive center-block">
+								</div>
+								
+								<p>Image denoising improves rendered images by integrating a  <a href="https://www.openimagedenoise.org">Intel® Open Image Denoise</a> library into the pipeline. It uses additional data such as normals and albedo to preserve details and avoid excessive blurring.</p>
+								
+								<ul class="actions special">
+									<li><a href="#" class="button full-story-btn" onclick="toggleText(this)">Further details</a></li>
+								</ul>
+							
+								<!-- Hidden Content -->
+								<div class="full-story-content" id="storyContent">
+									<li><strong>Source code:</strong></li>
+									<ul>
+										<code><a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">src/postprocess/denoising.cpp</a></code>
+									</ul>
+									<li><strong>Simple test:</strong></li>
+									<ul>
+										<code><a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">tests/feature_tests/postprocess/denoising.xml</a></code>
+									</ul>
+									<div class="twentytwenty-container" style="width: 100%">
+										<img src="images/features/postprocess/postprocess_before.png" alt="Before" class="img-responsive center-block">
+										<img src="images/features/postprocess/postprocess_after.png" alt="After" class="img-responsive center-block">
+									</div>
+									<li><strong>References:</strong></li>
+									<p>We use <a href="https://www.openimagedenoise.org">Intel® Open Image Denoise</a> library to denoise our images.</p>
+								</div>
+							</article>	
+							
+							<article>
+								<header>
+									<h2>Area Lights</h2>
+								</header>
+								
+								<div class="twentytwenty-container" style="width: 100%">
+									<img src="images/scene/postprocessed.jpeg" alt="Before" class="img-responsive center-block">
+									<img src="images/scene/area.jpeg" alt="After" class="img-responsive center-block">
+								</div>
+								
+								<p>Area lights improve rendering quality by reducing noise through direct sampling of emissive surfaces. 
+								Instead of relying on chance hits, they sample light sources proportional to their area when a surface is hit. 
+								This ensures more consistent lighting contributions and lowers variance.</p>
+								<p><strong> In our scene, </strong> area lights are used to create a light below the knight, giving it a mystical glow and emphasizing the knight's presence.</p>								
+								<ul class="actions special">
+									<li><a href="#" class="button full-story-btn" onclick="toggleText(this)">Further details</a></li>
+								</ul>
+							
+								<!-- Hidden Content -->
+								<div class="full-story-content" id="storyContent">
+									<li><strong>Source code:</strong></li>
+									<ul>
+										<code><a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">src/lights/area.cpp</a></code>
+									</ul>
+									<li><strong>Simple test:</strong></li>
+									<ul>
+										<code><a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">tests/feature_tests/area_lights/emission_area.xml</a></code>
+									</ul>
+									<div class="twentytwenty-container" style="width: 100%">
+										<img src="images/features/area_ligts/area_before.jpeg" alt="Before" class="img-responsive center-block">
+										<img src="images/features/area_ligts/area_after.jpeg" alt="After" class="img-responsive center-block">
+									</div>
+									<li><strong>References:</strong></li>
+									<p>Our implementation was inspired by <a href="https://www.pbr-book.org/3ed-2018/Light_Sources/Area_Lights"> </a> Physically Based Rendering book (Chapter 12.5). </p>
+								</div>
+							</article>
+
+							<article>
+								<header>
+									<h2>Thinlens</h2>
+								</header>
+								
+								<div class="twentytwenty-container" style="width: 100%">
+									<img src="images/scene/postprocessed.jpeg" alt="Before" class="img-responsive center-block">
+									<img src="images/scene/thinlens.jpeg" alt="After" class="img-responsive center-block">
+								</div>
+								
+								<p>A thinlens camera simulates real-world optics by enabling depth of field effects. This allows us to control the scene focus by varying aperture values.</p>
+								<p><strong>In our scene, </strong> thinlens helps us control the focus of the camera towards the knight, which is the main character of the scenario.</p>
+
+								
+								<ul class="actions special">
+									<li><a href="#" class="button full-story-btn" onclick="toggleText(this)">Further details</a></li>
+								</ul>
+							
+								<!-- Hidden Content -->
+								<div class="full-story-content" id="storyContent">
+									<li><strong>Source code:</strong></li>
+									<ul>
+										<code><a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">src/cameras/thinlens.cpp</a></code>
+									</ul>
+									<li><strong>Simple test:</strong></li>
+									<ul>
+										<code><a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">tests/feature_tests/thinlens/thinlens.xml</a></code>
+									</ul>
+									<div class="twentytwenty-container" style="width: 100%">
+										<img src="images/features/thinlens/thinlens_before.png" alt="Before" class="img-responsive center-block">
+										<img src="images/features/thinlens/thinlens_after.png" alt="After" class="img-responsive center-block">
+									</div>
+									<li><strong>References:</strong></li>
+									<p>Our implementation was inspired by <a href="https://www.pbr-book.org/3ed-2018/Camera_Models/Projective_Camera_Models">Physically Based Rendering book (Chapter 6.2)</a>.</p>
+								</div>
+							</article>
+							
+						</section>
+					<!-- Header -->
+					<header style="text-align: center;">
+						<h2>Extra features that do <u>not</u> appear in our scene</h2>
+					</header>
+						<section class="posts">
+							<article>
+								<header>
+									<h2>Signed Distance Fields</h2>
+								</header>
+								
+								<div class="image main" style="width: 50%; margin: auto; text-align: center;">
+									<img src="images/features/sdfs/mandelbulb_8.png" alt="" style="display: block; margin: auto;" />
+								</div>
+								
+								<p>Signed Distance Fields (SDFs) represent shapes by calculating the distance to the nearest surface, enabling efficient rendering of complex geometries through ray marching. In this example, we build a Mandelbulb shape with n = 8.</p>
+								
+								<ul class="actions special">
+									<li><a href="#" class="button full-story-btn" onclick="toggleText(this)">Further details</a></li>
+								</ul>
+							
+								<!-- Hidden Content -->
+								<div class="full-story-content" id="storyContent">
+									<li><strong>Source code:</strong></li>
+									<ul>
+										<code><a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">src/shapes/mandelbulb.cpp</a></code>
+									</ul>
+									<li><strong>Simple test:</strong></li>
+									<ul>
+										<code><a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">tests/feature_tests/signed_distance_fields/mandelbulb_4.xml</a></code>
+									</ul>
+									<li><strong>Another example:</strong> </li> <br>
+									<div class="image main" style="width: 60%; margin: auto; text-align: center;">
+										<img src="images/features/sdfs/mandelbulb_4.png" alt="" style="display: block; margin: auto;" />
+										<p style="text-align: center;">n=4</p>
+									</div>
+									<br>
+									<li><strong>References:</strong></li>
+									<p>Our implementation was inspired by <a href="https://iquilezles.org/articles/normalsSDF/">Iquilezles</a> and <a href="http://blog.hvidtfeldts.net/index.php/2011/09/distance-estimated-3d-fractals-v-the-mandelbulb-different-de-approximations/">Syntopia</a>.</p>
+
+								</div>
+							</article>
+
+							<article>
+								<header>
+									<h2>Break things</h2>
+								</header>
+								
+								<div class="image main" style="width: 50%; margin: auto; text-align: center;">
+									<img src="images/features/break_things/sinusoidal_0.00001_small_amplitude.png" alt="" style="display: block; margin: auto;" />
+								</div>
+								
+								<p>Arriving to a consistent scene was not easy. Below we show some bugs that broke our renderer making it generate interesting results.</p>
+								
+								<ul class="actions special">
+									<li><a href="#" class="button full-story-btn" onclick="toggleText(this)">Further details</a></li>
+								</ul>
+							
+								<!-- Hidden Content -->
+								<div class="full-story-content" id="storyContent">
+									<!-- <div class="twentytwenty-container" style="width: 100%">
+										<img src="images/pic02.jpg" alt="Before" class="img-responsive center-block">
+										<img src="images/pic03.jpg" alt="After" class="img-responsive center-block">
+									</div> -->
+									<li><strong>Another example:</strong> </li> <br>
+									<div class="image main" style="width: 60%; margin: auto; text-align: center;">
+										<img src="images/features/break_things/halton_incorrect_2.png" alt="" style="display: block; margin: auto;" />
+									</div>
+									
+								</div>
+							</article>
+						</section>
+				</div>
+
+
+				<!-- Copyright -->
+					<div id="copyright">
+						<ul><li>&copy; 2024 <a href="https://www.linkedin.com/in/alejandro-campayo-fernández-84b47a223/?originalSubdomain=es">Alejandro Campayo Fernández</a>, 
+							<a href="https://www.linkedin.com/in/luis-rodolfo-macias-jimenez-849a12219/?originalSubdomain=de">Luis Rodolfo Macias</a> 
+						</li></ul>
+					</div>
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+			<script src="assets/js/jquery.event.move.js"></script>
+			<script src="assets/js/jquery.twentytwenty.js"></script>
+			<script>
+				$(document).ready(function() {
+					$(".twentytwenty-container").twentytwenty();
+				});
+			</script>
+			<script>
+				document.addEventListener("DOMContentLoaded", function () {
+					const buttons = document.querySelectorAll(".full-story-btn");
+				
+					buttons.forEach(button => {
+						button.addEventListener("click", function (event) {
+							event.preventDefault();
+							const content = this.closest("article").querySelector(".full-story-content");
+							content.classList.toggle("open");
+						});
+					});
+				});
+			</script>
+			<script>
+				function toggleText(button) {
+					if (button.textContent === "Further details") {
+						button.textContent = "Hide details";
+					} else {
+						button.textContent = "Further details";
+					}
+				}
+			</script>
+			<style>
+				.full-story-content {
+					max-height: 0;
+					overflow: hidden;
+					transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+					opacity: 0;
+					text-align: left;
+				}
+				
+				.full-story-content.open {
+					max-height: 10000px; /* Adjust based on content */
+					opacity: 1;
+					overflow-y: auto;
+				}
+				</style>
+	</body>
+</html>

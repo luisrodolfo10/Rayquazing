@@ -1,0 +1,181 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>Rayquazing main page</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="icon" type="image/png" href="assets/favicon_io/favicon.ico">
+		<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon_io/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon_io/favicon-16x16.png">
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper" class="fade-in">
+
+				<!-- Intro -->
+				<div id="intro">
+					<h1>Rayquazing<br />Renderer</h1>
+					<p>A project developed for 
+						<a href="https://graphics.cg.uni-saarland.de/courses/cg1-2024/index.html">Computer Graphics Saarland University</a>
+					</p>
+					<ul class="actions" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+						<img src="images/rayquaza_pixel_left.png" alt="Left Image" style="width: 400px; height: auto;">
+						<li><a href="#header" class="button icon solid solo fa-arrow-down scrolly">Continue</a></li>
+						<img src="images/rayquaza_pixel_right.png" alt="Right Image" style="width: 400px; height: auto;">
+					</ul>
+				</div>
+				
+
+				<!-- Header -->
+				<header id="header" style="margin-bottom: 0px; padding-bottom: 100px;">
+					<a class="logo">Rayquazing</a>
+					<br>
+					<p style="font-size: 14px; margin-bottom: 0; padding-bottom: 0;">Alejandro Campayo Fernández & Luis Rodolfo Macias</p>
+				</header>
+					
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li class="active"><a href="index.html">Our scene</a></li>
+							<li><a href="features.html">Our features</a></li>
+							<li><a href="others.html">Others</a></li>
+						</ul>
+						<ul class="icons">
+							<li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+				<div id="main">
+
+					<!-- Post -->
+					<head>
+						<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+						<style>
+							h_title {
+								font-family: 'Cinzel', serif;
+								font-weight: 600; 
+								text-transform: uppercase; 
+								letter-spacing: 2px;
+								font-size: 55px; 
+							}
+						</style>
+					</head>
+					<body>
+						<section class="post" style="padding-top: 50px;">
+							<header class="major" style="margin-bottom: 0;">
+								<h_title>Echoes of War, <br> Whispers of Peace</h_title>
+							</header>
+					
+							<style>
+								/* Full-screen modal styling */
+								.fullscreen-img {
+									display: none; /* Initially hidden */
+									position: fixed;
+									top: 0;
+									left: 0;
+									width: 100%;
+									height: 100%;
+									background: rgba(0, 0, 0, 0.9); /* Dark overlay */
+									justify-content: center;
+									align-items: center;
+									z-index: 1000;
+								}
+					
+								.fullscreen-img img {
+									max-width: 90%;
+									max-height: 90%;
+									border-radius: 10px;
+								}
+					
+								.fullscreen-img.active {
+									display: flex; /* Show when active */
+								}
+					
+								/* Close button */
+								.fullscreen-img::after {
+									content: "✖";
+									position: absolute;
+									top: 20px;
+									right: 30px;
+									font-size: 30px;
+									color: white;
+									cursor: pointer;
+								}
+					
+								/* Image Hover Effect */
+								.image.main img {
+									transition: transform 0.3s ease-in-out;
+								}
+					
+								.image.main img:hover {
+									transform: scale(1.05); /* Slight expansion */
+									cursor: pointer;
+								}
+					
+								/* Caption */
+								.image-caption {
+									text-align: center;
+									font-style: italic;
+									margin-top: 5px;
+									color: gray;
+								}
+							</style>
+					
+							<!-- Regular Image Container -->
+							<div class="image main" style="margin-top: 0; padding-top: 0;">
+								<img src="images/scene/Knight_Final_postprocessed.jpg" alt="Knight Scene" onclick="openFullScreen(this)" />
+								<p class="image-caption">(click to expand)</p>
+							</div>
+					
+							<!-- Full-screen Modal -->
+							<div class="fullscreen-img" id="fullscreenContainer" onclick="closeFullScreen()">
+								<img id="fullscreenImg" src="" alt="Full-screen Image">
+							</div>
+					
+							<p style="text-align: center; font-style: italic;">
+								"A battlefield full of destruction and disorder. However, in the middle, a calm knight stands, untouched by the madness around him."
+							</p>
+						</section>
+					</body>
+
+				</div>
+
+				<!-- Copyright -->
+				<div id="copyright">
+					<ul><li>&copy; 2024 <a href="https://www.linkedin.com/in/alejandro-campayo-fernández-84b47a223/?originalSubdomain=es">Alejandro Campayo Fernández</a>, 
+						<a href="https://www.linkedin.com/in/luis-rodolfo-macias-jimenez-849a12219/?originalSubdomain=de">Luis Rodolfo Macias</a>
+					</li></ul>
+				</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+			<script>
+				function openFullScreen(imgElement) {
+					let fullScreenDiv = document.getElementById("fullscreenContainer");
+					let fullScreenImg = document.getElementById("fullscreenImg");
+			
+					fullScreenImg.src = imgElement.src; // Set full-screen image
+					fullScreenDiv.classList.add("active"); // Show modal
+				}
+			
+				function closeFullScreen() {
+					document.getElementById("fullscreenContainer").classList.remove("active");
+				}
+			</script>
+
+	</body>
+</html>
